@@ -1,6 +1,7 @@
 #include "headers/matrix.h"
 #include <ctype.h>
 
+
 double **create_A_matrix(int n, FILE *in, int *A_size)
 {
 	int size = 0;
@@ -66,7 +67,7 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		{
 			// napisanie na odwr√ddt ≈e np 1 ma polonczenie z 2 jest git
 			// ale ze 2 ma poloddnczenie z 1 jest blendne
-			//int node_nr = iddndex2[i];
+			//int node_nr = iddndex2[i];i
 			//int ab = j+1;dd
 			int x = index[j]; //przechodzimy po wiezcholkach do kturych punkt y ma przejscie
 			matrix[y][x] = 1;
@@ -81,6 +82,39 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 	*A_size = size;
 	return matrix;
 }
+
+double **diagonal_matrix(double **matrix, int A_size){
+	
+        double **dig = calloc(A_size, sizeof(double));	
+        for(int i = 0; i < A_size; i++)
+                dig[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
+
+	int sum;
+
+	for(int i = 0; i < A_size; i++){
+		sum = 0;
+		for(int j = 0; j < A_size; j++){ 
+			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
+		}
+		dig[i][i] = sum;	// ustawiamy na lini diagonalnej wartosc sumy wiersza
+	}
+	return dig; // zwracamy tablice
+}
+
+double **subtract_matrix(double **matrix1, double **matrix2, int A_size){
+	
+        double **sub = calloc(A_size, sizeof(double));	
+	for(int i = 0; i < A_size; i++)
+                sub[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
+	
+	for(int i = 0; i < A_size; i++){
+		for(int j = 0; j < A_size; j++){
+			sub[i][j] = matrix1[i][j] - matrix2[i][j]; // odejmujemy od elemntu macierzy1 elemnt macierzy2
+		}
+	}
+	return sub; // zwracamy roznice macierzy
+}
+
 
 void print_matrix(double **matrix, int n)
 {
