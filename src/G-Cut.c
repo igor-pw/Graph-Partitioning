@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
 	double **A_matrix = create_A_matrix(n, in, &A_size);
 	double **Diag = diagonal_matrix(A_matrix, A_size);
-	double **Sub = subtract_matrix(A_matrix, Diag ,A_size);
+	double **Sub = subtract_matrix(Diag, A_matrix ,A_size);
 	print_matrix(A_matrix, A_size);
 	printf("\n");
 	printf("\n");
