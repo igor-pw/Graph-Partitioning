@@ -34,6 +34,9 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		if(fscanf(in, "%d%c", &index[counter], &c) == 2)
 			counter++;
 	}
+	for(int i = 0; i<counter;i++)
+		printf("%d ,",index[i]);
+	printf("\n");
 
 	c = ';';
 	
@@ -43,21 +46,35 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 			counter2++;
 	}
 	
-	index2[counter2] = counter2;
+	for(int i = 0; i<counter2;i++)
+		printf("%d ,",index2[i]);
+	printf("\n");
+	
+//	index2[counter2] = counter2;
 
         double **matrix = calloc(size, sizeof(double));
 
         for(int i = 0; i < size; i++)
                 matrix[i] = calloc(size, sizeof(double));
 
-	for(int i = 0; i <= counter2; i++)
+	for(int i = 0; i < (counter2 -1) ; i++)
 	{
-		for(int j = index2[i]; j < index2[i+1]; j++)
+		
+		int y = index[index2[i]]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
+		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy
+								   // a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
 		{
-			int node_nr = index2[i];
+			// napisanie na odwrÃddt Åe np 1 ma polonczenie z 2 jest git
+			// ale ze 2 ma poloddnczenie z 1 jest blendne
+			//int node_nr = iddndex2[i];
+			//int ab = j+1;dd
+			int x = index[j]; //przechodzimy po wiezcholkach do kturych punkt y ma przejscie
+			matrix[y][x] = 1;
+			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
 
-			matrix[index[node_nr]][index[j+1]] = 1;
-			matrix[index[j+1]][node_nr] = 1;
+
+			//matrix[index[node_nr]][index[ab]] = 1;
+			//matrix[index[ab]][node_nr] = 1;
 		}	
 	}
 	
