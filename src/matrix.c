@@ -65,10 +65,10 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy
 								   // a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
 		{
-			// napisanie na odwrÃddt Åe np 1 ma polonczenie z 2 jest git
-			// ale ze 2 ma poloddnczenie z 1 jest blendne
-			//int node_nr = iddndex2[i];i
-			//int ab = j+1;dd
+			// napisanie na odwrot np 1 ma polonczenie z 2 jest git
+			// ale ze 2 ma poloddnczenie z 1 jest bledne
+			//int node_nr = index2[i];
+			//int ab = j+1;
 			int x = index[j]; //przechodzimy po wiezcholkach do kturych punkt y ma przejscie
 			matrix[y][x] = 1;
 			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
@@ -83,20 +83,20 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 	return matrix;
 }
 
-double **diagonal_matrix(double **matrix, int A_size){
+double **diagonal_matrix(double **matrix, int A_size, int *D_norm){
 	
         double **dig = calloc(A_size, sizeof(double));	
         for(int i = 0; i < A_size; i++)
                 dig[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
-
-	int sum;
+	int sum = 0;
 
 	for(int i = 0; i < A_size; i++){
 		sum = 0;
 		for(int j = 0; j < A_size; j++){ 
 			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
 		}
-		dig[i][i] = sum;	// ustawiamy na lini diagonalnej wartosc sumy wiersza
+		dig[i][i] = sum;	// ustawiamy na lini diagonalnej wartosc sumy wiersza		
+		*D_norm += sum*sum;//pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
 	}
 	return dig; // zwracamy tablice
 }
@@ -156,6 +156,7 @@ double *vec_sub(double *a, double *b, int k){ // odejmowanie wektorow
 
 void print_matrix(double **matrix, int n)
 {
+	//wypisuje macierz
 	for(int i = 0; i < n; i++)
 	{
 		printf("| ");
@@ -170,4 +171,38 @@ void print_matrix(double **matrix, int n)
 
 }
 
+double *multiply_mtx_by_vec(double **matrix, int n, double *vec)
+{
+	//mnozy macierz przez wektor
+	double *result_vec = malloc(sizeof(double) * n);
 
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+			result_vec[i] += matrix[i][j]*vec[j]; 
+	}
+
+	return result_vec;
+}
+
+double multiply_vec_by_vec(double *vec, double *vecT, int n)
+{
+	//mnozy wektor przez wektor
+	double result = 0;
+
+	for(int i = 0; i < n; i++)
+		result += vecT[i]*vec[i];
+
+	return result;
+}
+
+double *create_initial_vec(double **D_matrix, int D_norm, int n)
+{
+	//tworzy wektor poczatkowy
+	double *initial_vec = malloc(sizeof(double) * n);
+
+	for(int i = 0; i < n; i++)
+		initial_vec[i] = D_matrix[i][i]/sqrt((double)D_norm);
+	
+	return initial_vec;
+}
