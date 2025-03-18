@@ -35,23 +35,16 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		if(fscanf(in, "%d%c", &index[counter], &c) == 2)
 			counter++;
 	}
-	for(int i = 0; i<counter;i++)
-		printf("%d ,",index[i]);
-	printf("\n");
 
 	c = ';';
 	
 	while(!isspace(c))
 	{
-		if(fscanf(in, "%d%c", &index2[counter2], &c) == 2);
+		if(fscanf(in, "%d%c", &index2[counter2], &c) == 2)
 			counter2++;
 	}
 	
-	for(int i = 0; i<counter2;i++)
-		printf("%d ,",index2[i]);
-	printf("\n");
-	
-//	index2[counter2] = counter2;
+	//index2[counter2] = counter2;
 
         double **matrix = calloc(size, sizeof(double));
 
@@ -65,17 +58,9 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy
 								   // a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
 		{
-			// napisanie na odwrot np 1 ma polonczenie z 2 jest git
-			// ale ze 2 ma poloddnczenie z 1 jest bledne
-			//int node_nr = index2[i];
-			//int ab = j+1;
 			int x = index[j]; //przechodzimy po wiezcholkach do kturych punkt y ma przejscie
 			matrix[y][x] = 1;
 			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
-
-
-			//matrix[index[node_nr]][index[ab]] = 1;
-			//matrix[index[ab]][node_nr] = 1;
 		}	
 	}
 	
@@ -96,7 +81,7 @@ double **diagonal_matrix(double **matrix, int A_size, int *D_norm){
 			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
 		}
 		dig[i][i] = sum;	// ustawiamy na lini diagonalnej wartosc sumy wiersza		
-		*D_norm += sum*sum;//pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
+		*D_norm += pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
 	}
 	return dig; // zwracamy tablice
 }
@@ -119,20 +104,20 @@ double *vector_norm(double *v, int size){ //normalizacja wektora
 	for(int i=0; i <size; i++)
 		lenn += pow(v[i], 2);
 	lenn = sqrt(lenn);
-	//+++++++++++dodane do ulatwienia testowania funkcji	
+	//dodane do ulatwienia testowania funkcji	
 	double *norm = calloc(size, sizeof(double));	
-	//++++++++dodane
+	//dodane
 	for(int i = 0; i<size;i++)
 		norm[i] = v[i]/lenn;
 	return norm;
 }
 
 double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
-	//+++++++++++dodane do ulatwienia testowania funkcji	
+	//dodane do ulatwienia testowania funkcji	
 	double **tri = calloc(k, sizeof(double));	
 	for(int i = 0; i < k; i++)
                 tri[i] = calloc(k, sizeof(double)); 
-	//+++++++++dodane
+	//dodane
 	
 	int t = k-1; //z wektora b zuzyje sie k-1 elementow
 	for(int i = 0; i<t; i++){// wypelnienie macierzy
@@ -145,9 +130,9 @@ double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiago
 
 }
 double *vec_sub(double *a, double *b, int k){ // odejmowanie wektorow 
-	//+++++++++++dodane do ulatwienia testowania funkcji	
+	//dodane do ulatwienia testowania funkcji	
 	double *sub = calloc(k, sizeof(double));	
-	//+++++++++++dodane
+	//dodane
 	for(int i =0; i<k; i++){
 		sub[i] = a[i] - b[i];
 	}
@@ -161,13 +146,13 @@ void print_matrix(double **matrix, int n)
 	{
 		printf("| ");
 
-		for(int j = 0; j < m; j++)
+		for(int j = 0; j < n; j++)
 			printf("%g ", matrix[i][j]);
 
 		printf("|\n");
 	}
 
-	printf("\nAdjancency Matrix %dx%d\n\n", n, n);
+	printf("\nMatrix %dx%d\n\n", n, n);
 
 }
 
