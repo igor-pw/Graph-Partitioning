@@ -29,6 +29,34 @@ int main(int argc, char **argv)
 	printf("\n");
 	printf("\n");
 	print_matrix(Sub, A_size);
+	printf("\n");
+	printf("\n");
+	printf("\n");
+	//testowanie funkcji 
+	double a[15];
+	double b[14];
+	double c[14];
+	for(int i = 0; i <14; i++){
+		a[i] = i;
+		b[i] = 2*i;
+		c[i] = i ;
+	}
+	double *uwu = vec_sub(b,c,14);
+	a[14] = 15;
+	double *norm_a = vector_norm(a,15);
+	double *norm_b = vector_norm(b,14);
 
+	for( int i =0; i < 14; i ++){
+		printf("%lf,	",norm_a[i]);
+		printf("%lf,	",uwu[i]);
+		printf("%lf\n",norm_b[i]);
+
+	}
+	printf("\n");
+	printf("\n");
+	printf("\n");
+	double **tri = tri_matrix(norm_a, norm_b, 15);
+	print_matrix(tri, 15);
+	
 	return 0;
 }

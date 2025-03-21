@@ -114,7 +114,45 @@ double **subtract_matrix(double **matrix1, double **matrix2, int A_size){
 	}
 	return sub; // zwracamy roznice macierzy
 }
+double *vector_norm(double *v, int size){ //normalizacja wektora
+	int lenn = 0;
+	for(int i=0; i <size; i++)
+		lenn += pow(v[i], 2);
+	lenn = sqrt(lenn);
+	//+++++++++++dodane do ulatwienia testowania funkcji	
+	double *norm = calloc(size, sizeof(double));	
+	//++++++++dodane
+	for(int i = 0; i<size;i++)
+		norm[i] = v[i]/lenn;
+	return norm;
+}
 
+double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
+	//+++++++++++dodane do ulatwienia testowania funkcji	
+	double **tri = calloc(k, sizeof(double));	
+	for(int i = 0; i < k; i++)
+                tri[i] = calloc(k, sizeof(double)); 
+	//+++++++++dodane
+	
+	int t = k-1; //z wektora b zuzyje sie k-1 elementow
+	for(int i = 0; i<t; i++){// wypelnienie macierzy
+		tri[i][i] = a[i];//wartosci a znajduja sie na diagonali
+		tri[i][i+1] = b[i];//wartosci b sa pod i po prawo od wartosci b
+		tri[i+1][i] = b[i];
+	}
+	tri[t][t] = a[t]; //dodanie a na k x k miejsce bo nie moze byc b pod nim i obok
+	return tri;
+
+}
+double *vec_sub(double *a, double *b, int k){ // odejmowanie wektorow 
+	//+++++++++++dodane do ulatwienia testowania funkcji	
+	double *sub = calloc(k, sizeof(double));	
+	//+++++++++++dodane
+	for(int i =0; i<k; i++){
+		sub[i] = a[i] - b[i];
+	}
+	return sub;
+}
 
 void print_matrix(double **matrix, int n)
 {
@@ -122,7 +160,7 @@ void print_matrix(double **matrix, int n)
 	{
 		printf("| ");
 
-		for(int j = 0; j < n; j++)
+		for(int j = 0; j < m; j++)
 			printf("%g ", matrix[i][j]);
 
 		printf("|\n");
@@ -131,3 +169,5 @@ void print_matrix(double **matrix, int n)
 	printf("\nAdjancency Matrix %dx%d\n\n", n, n);
 
 }
+
+
