@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	FILE *in = fopen(file_name, "r");
 
 	int n = 0;
-	int A_size = 0;
+	int nodes = 0;
 	int D_norm = 0;
 
 	fscanf(in, "%d\n", &n);
@@ -18,40 +18,36 @@ int main(int argc, char **argv)
 	if(n == 0)
 		return 2;
 
-	double **A_matrix = create_A_matrix(n, in, &A_size);	
-	double **Diag = diagonal_matrix(A_matrix, A_size, &D_norm);
-	double **Sub = subtract_matrix(Diag, A_matrix ,A_size);
+	//macierz sasiedztwa
+	double **A_matrix = create_A_matrix(in, &nodes);	
 	
-	//testowanie funkcji 
-	double a[15];
-	double b[14];
-	double c[14];
-	for(int i = 0; i <14; i++){
-		a[i] = i;
-		b[i] = 2*i;
-		c[i] = i ;
-	}
-	double *uwu = vec_sub(b,c,14);
-	a[14] = 15;
-	double *norm_a = vector_norm(a,15);
-	double *norm_b = vector_norm(b,14);
+	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
+	double **D_matrix = create_D_matrix(A_matrix, nodes, &D_norm);
+
+	//macierz Laplace'a
+	double **L_matrix = subtract_matrix(D_matrix, A_matrix, nodes);
 	
-	printf("\n");
-	double *initial_vec = create_initial_vec(Diag, D_norm, A_size);
+	//wektor poczatkowy	
+	double *initial_vec = create_initial_vec(D_matrix, D_norm, nodes);
 
-	/*for(int i = 0; i < A_size; i++)
-	      printf("%g ", initial_vec[i]);	
-	*/
-	for( int i =0; i < 14; i ++){
-		printf("%lf,	",norm_a[i]);
-		printf("%lf,	",uwu[i]);
-		printf("%lf\n",norm_b[i]);
+	//od linijki 33 do 49 trzeba zrobic rekurencyjna funkcje dodajaca alfa i beta do tablic
+	//wektor pomocniczy
+	double *vec = multiply_mtx_by_vec(L_matrix, initial_vec, nodes);
 
-	}
+	//wspolczynnik i,i macierzy tridiagonalnej
+	double alfa = multiply_vec_by_vec(vec, initial_vec, nodes);
+	printf("alfa: %g\n", alfa);
 
-	printf("\n\n");
-	double **tri = tri_matrix(norm_a, norm_b, 15);
-	print_matrix(tri, 15);
-	
+	//wektor pomoczniczy staje sie wektorem reszty
+	substract_vec(vec, initial_vec, alfa, nodes); //dla bety != 0 odejmujemy tez beta[i]*initial_vec[j] 
+
+	//wspolczynnik i-1,i oraz i,i-1 macierzy tridiagonalnej
+	double beta = vec_norm(vec, nodes);
+	printf("beta: %g\n", beta);
+
+	//powstaje drugi wektor poczatkowy dla ktorego powtarzane sa wszystkie kroki od 33 linii
+	divide_vec(initial_vec, beta, nodes);	//pozniej trzeba skopiowac initial_vec
+	print_vec(initial_vec, nodes);
+
 	return 0;
 }

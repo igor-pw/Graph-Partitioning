@@ -2,8 +2,10 @@
 #include <ctype.h>
 
 
-double **create_A_matrix(int n, FILE *in, int *A_size)
+double **create_A_matrix(FILE *in, int *nodes)
 {
+	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
+
 	int size = 0;
 	int nr;
 	char c = ';';
@@ -64,12 +66,12 @@ double **create_A_matrix(int n, FILE *in, int *A_size)
 		}	
 	}
 	
-	*A_size = size;
+	*nodes = size;
 	return matrix;
 }
 
-double **diagonal_matrix(double **matrix, int A_size, int *D_norm){
-	
+double **create_D_matrix(double **matrix, int A_size, int *D_norm)
+{	
         double **dig = calloc(A_size, sizeof(double));	
         for(int i = 0; i < A_size; i++)
                 dig[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
@@ -86,30 +88,31 @@ double **diagonal_matrix(double **matrix, int A_size, int *D_norm){
 	return dig; // zwracamy tablice
 }
 
-double **subtract_matrix(double **matrix1, double **matrix2, int A_size){
+double **subtract_matrix(double **matrix1, double **matrix2, int n)
+{	
+        double **sub = calloc(n, sizeof(double));	
+	for(int i = 0; i < n; i++)
+                sub[i] = calloc(n, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
 	
-        double **sub = calloc(A_size, sizeof(double));	
-	for(int i = 0; i < A_size; i++)
-                sub[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
-	
-	for(int i = 0; i < A_size; i++){
-		for(int j = 0; j < A_size; j++){
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
 			sub[i][j] = matrix1[i][j] - matrix2[i][j]; // odejmujemy od elemntu macierzy1 elemnt macierzy2
 		}
 	}
 	return sub; // zwracamy roznice macierzy
 }
-double *vector_norm(double *v, int size){ //normalizacja wektora
-	int lenn = 0;
-	for(int i=0; i <size; i++)
-		lenn += pow(v[i], 2);
-	lenn = sqrt(lenn);
-	//dodane do ulatwienia testowania funkcji	
-	double *norm = calloc(size, sizeof(double));	
-	//dodane
-	for(int i = 0; i<size;i++)
-		norm[i] = v[i]/lenn;
-	return norm;
+
+double vec_norm(double *vec, int n)
+{ 
+	//normalizacja wektora (dlugosc) 
+	//poprawilem funkcje bo powinna zwraca wspolczynnik a nie wektor
+	
+	double sum = 0;
+	
+	for(int i = 0; i < n; i++)
+		sum += pow(vec[i], 2);
+
+	return sqrt(sum);
 }
 
 double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
@@ -156,7 +159,18 @@ void print_matrix(double **matrix, int n)
 
 }
 
-double *multiply_mtx_by_vec(double **matrix, int n, double *vec)
+void print_vec(double *vec, int n)
+{
+	printf("\n[ ");
+
+	for(int i = 0; i < n; i++)
+		printf("%g ", vec[i]);
+
+	printf("]\n");
+
+}
+
+double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
 {
 	//mnozy macierz przez wektor
 	double *result_vec = malloc(sizeof(double) * n);
@@ -190,4 +204,18 @@ double *create_initial_vec(double **D_matrix, int D_norm, int n)
 		initial_vec[i] = D_matrix[i][i]/sqrt((double)D_norm);
 	
 	return initial_vec;
+}
+
+void substract_vec(double *vec, double *coef_vec, double coef, int n)
+{
+	//operacja vec - coef_vec * coef
+	for(int i = 0; i < n; i++)
+		vec[i] -= coef*coef_vec[i];
+}
+
+void divide_vec(double *vec, double coef, int n)
+{
+	//dzieli vec przez wspolczynnik
+	for(int i = 0; i < n; i++)
+		vec[i] /= coef;
 }
