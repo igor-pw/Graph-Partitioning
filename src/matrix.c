@@ -25,13 +25,17 @@ double **create_A_matrix(FILE *in, int *nodes)
 			continue;
 	}
 
-	int index[8192]; 
-	int index2[8192];
+	printf("nodes: %d\n", size);
+	
+	int index[16386]; 
+
+	//zredukowac do jednej tablicy
+	int index2[16386];
 	
 	c = ';';
 	int counter = 0;
 	int counter2 = 0;
-
+	
 	while(!isspace(c))
 	{
 		if(fscanf(in, "%d%c", &index[counter], &c) == 2)
@@ -44,23 +48,27 @@ double **create_A_matrix(FILE *in, int *nodes)
 	{
 		if(fscanf(in, "%d%c", &index2[counter2], &c) == 2)
 			counter2++;
+		else
+			break;
 	}
 	
-	//index2[counter2] = counter2;
 
-        double **matrix = calloc(size, sizeof(double));
+	printf("Wczytywanie graf\n");
 
+	//alokujemy pamiec na size wskaznikow do tablic
+        double **matrix = malloc(sizeof(double*) * size);
+
+	//alokujemy pamiec na size elementow i wypelniamy zerami
         for(int i = 0; i < size; i++)
                 matrix[i] = calloc(size, sizeof(double));
 
-	for(int i = 0; i < (counter2 -1) ; i++)
-	{
-		
+	for(int i = 0; i < (counter2-1); i++)
+	{	
 		int y = index[index2[i]]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
 		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy
 								   // a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
 		{
-			int x = index[j]; //przechodzimy po wiezcholkach do kturych punkt y ma przejscie
+			int x = index[j]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
 			matrix[y][x] = 1;
 			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
 		}	
@@ -72,7 +80,9 @@ double **create_A_matrix(FILE *in, int *nodes)
 
 double **create_D_matrix(double **matrix, int A_size, int *D_norm)
 {	
-        double **dig = calloc(A_size, sizeof(double));	
+	//alokujemy pamiec na n wskaznikow do tablic
+        double **dig = malloc(sizeof(double*) * A_size);	
+
         for(int i = 0; i < A_size; i++)
                 dig[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
 	int sum = 0;
@@ -89,10 +99,11 @@ double **create_D_matrix(double **matrix, int A_size, int *D_norm)
 }
 
 double **subtract_matrix(double **matrix1, double **matrix2, int n)
-{	
-        double **sub = calloc(n, sizeof(double));	
+{
+	//alokujemy pamiec na n wskaznikow do tablic	
+        double **sub = malloc(sizeof(double*) * n);	
 	for(int i = 0; i < n; i++)
-                sub[i] = calloc(n, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
+                sub[i] = calloc(n, sizeof(double)); // tworzymy macierz o rozmiarze n i wypelniamy ja zerami
 	
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
@@ -117,10 +128,10 @@ double vec_norm(double *vec, int n)
 
 double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
 	//dodane do ulatwienia testowania funkcji	
-	double **tri = calloc(k, sizeof(double));	
+	double **tri = malloc(sizeof(double*) * k);
+
 	for(int i = 0; i < k; i++)
                 tri[i] = calloc(k, sizeof(double)); 
-	//dodane
 	
 	int t = k-1; //z wektora b zuzyje sie k-1 elementow
 	for(int i = 0; i<t; i++){// wypelnienie macierzy
@@ -132,13 +143,14 @@ double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiago
 	return tri;
 
 }
-double *vec_sub(double *a, double *b, int k){ // odejmowanie wektorow 
-	//dodane do ulatwienia testowania funkcji	
+double *vec_sub(double *a, double *b, int k)
+{ 
+	// odejmowanie wektorow 
 	double *sub = calloc(k, sizeof(double));	
-	//dodane
-	for(int i =0; i<k; i++){
+	
+	for(int i =0; i<k; i++)
 		sub[i] = a[i] - b[i];
-	}
+	
 	return sub;
 }
 
@@ -156,7 +168,6 @@ void print_matrix(double **matrix, int n)
 	}
 
 	printf("\nMatrix %dx%d\n\n", n, n);
-
 }
 
 void print_vec(double *vec, int n)
@@ -167,13 +178,12 @@ void print_vec(double *vec, int n)
 		printf("%g ", vec[i]);
 
 	printf("]\n");
-
 }
 
 double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
 {
 	//mnozy macierz przez wektor
-	double *result_vec = malloc(sizeof(double) * n);
+	double *result_vec = calloc(n, sizeof(double));
 
 	for(int i = 0; i < n; i++)
 	{
@@ -206,7 +216,7 @@ double *create_initial_vec(double **D_matrix, int D_norm, int n)
 	return initial_vec;
 }
 
-void substract_vec(double *vec, double *coef_vec, double coef, int n)
+void subtract_vec(double *vec, double *coef_vec, double coef, int n)
 {
 	//operacja vec - coef_vec * coef
 	for(int i = 0; i < n; i++)
@@ -218,4 +228,44 @@ void divide_vec(double *vec, double coef, int n)
 	//dzieli vec przez wspolczynnik
 	for(int i = 0; i < n; i++)
 		vec[i] /= coef;
+}
+
+void copy_vec(double *src_vec, double *dest_vec, int n)
+{
+	for(int i = 0; i < n; i++)
+		dest_vec[i] = src_vec[i];
+}
+
+void calculate_coefs(double **L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k)
+{
+	//wektor resztowy
+	double *residual_vec = multiply_mtx_by_vec(L_matrix, initial_vec, n);
+
+	//dla i > 0 odejmujemy poprzedni wektor poczatkowy
+	if(i > 0)
+		subtract_vec(residual_vec, prev_initial_vec, beta_coefs[i-1], n);
+
+	//wspolczynnik i,i macierzy tridiagonalnej
+	alfa_coefs[i] = multiply_vec_by_vec(residual_vec, initial_vec, n);
+
+	//aktualizacja wektora resztowego
+	subtract_vec(residual_vec, initial_vec, alfa_coefs[i], n);
+	
+	//wpolczynnik i-1,i oraz i,i-1 macierzy tridiagonalnej
+	beta_coefs[i] = vec_norm(residual_vec, n);
+
+	//kopiujemy zawartosc initial_vec do prev_initial_vec
+	copy_vec(initial_vec, prev_initial_vec, n);
+
+	//tworzymy nowy wektor poczatkowy
+	divide_vec(initial_vec, beta_coefs[i], n);
+	
+	//zwiekszamy licznik
+	i++;
+	
+	//wywolujemy rekurencyjnie funkcje k razy
+	if(i < k)
+		calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, n, i, k);
+
+	free(residual_vec);
 }
