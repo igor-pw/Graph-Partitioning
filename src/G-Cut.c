@@ -1,6 +1,6 @@
 #include "headers/matrix.h"
 
-#define ITERATIONS 12
+#define ITERATIONS 50
 
 int main(int argc, char **argv)
 {
@@ -48,13 +48,33 @@ int main(int argc, char **argv)
 	printf("Wspolczynniki alfa i beta\n");
 
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
-	double **T_matrix = tri_matrix(alfa_coefs, beta_coefs, nodes);
-	printf("Macierz tridiagonalna\n\n");
+	double **T_matrix = tri_matrix(alfa_coefs, beta_coefs, ITERATIONS);
+	printf("Macierz Tridiagonalna\n");
 
+
+	//macierz ortogonalna, poczatkowo pusta	
+	double **Q_matrix = malloc(sizeof(double*) * ITERATIONS);
+
+	for(int i = 0; i < ITERATIONS; i++)
+		Q_matrix[i] = calloc(ITERATIONS, sizeof(double));
+
+	//zamiana macierzy tridiagonalnej w diagonalna, ktorej elementy diagonali sa wartosciami wlasnymi	
+	for(int i = 0; i < ITERATIONS/2; i++)
+		calculate_eigenvalue(T_matrix, Q_matrix, ITERATIONS, 0);
+
+	printf("Wartosci wlasne\n");
 	//wypisanie macierzy tridiagonalnej
-	print_matrix(T_matrix, ITERATIONS);
+	//print_matrix(T_matrix, ITERATIONS);
 
-	//dodac obliczanie wartosci wlasnych, stworzyc wektory wlasne, posortowac wartosci wektorow wlasnych, policzyc mediane z wartosci wektorow -> podzial grafu na 2 czesci
+	//kopiujemy wartosci wlasne do wektora
+	double *eigenvalues_vec = malloc(sizeof(double) * ITERATIONS);
+
+	for(int i = 0; i < ITERATIONS; i++)
+		eigenvalues_vec[i] = T_matrix[i][i];
+
+	print_vec(eigenvalues_vec, ITERATIONS);
+
+	//znalezc najmniejsza dodatnia wartosc wlana, stworzyc wektory wlasne, posortowac wartosci wektorow wlasnych, policzyc mediane z wartosci wektorow -> podzial grafu na 2 czesci
 
 	return 0;
 }

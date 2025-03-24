@@ -53,7 +53,7 @@ double **create_A_matrix(FILE *in, int *nodes)
 	}
 	
 
-	printf("Wczytywanie graf\n");
+	printf("Wczytywanie grafu\n");
 
 	//alokujemy pamiec na size wskaznikow do tablic
         double **matrix = malloc(sizeof(double*) * size);
@@ -113,19 +113,6 @@ double **subtract_matrix(double **matrix1, double **matrix2, int n)
 	return sub; // zwracamy roznice macierzy
 }
 
-double vec_norm(double *vec, int n)
-{ 
-	//normalizacja wektora (dlugosc) 
-	//poprawilem funkcje bo powinna zwraca wspolczynnik a nie wektor
-	
-	double sum = 0;
-	
-	for(int i = 0; i < n; i++)
-		sum += pow(vec[i], 2);
-
-	return sqrt(sum);
-}
-
 double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
 	//dodane do ulatwienia testowania funkcji	
 	double **tri = malloc(sizeof(double*) * k);
@@ -143,97 +130,21 @@ double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiago
 	return tri;
 
 }
-double *vec_sub(double *a, double *b, int k)
-{ 
-	// odejmowanie wektorow 
-	double *sub = calloc(k, sizeof(double));	
-	
-	for(int i =0; i<k; i++)
-		sub[i] = a[i] - b[i];
-	
-	return sub;
-}
 
 void print_matrix(double **matrix, int n)
 {
 	//wypisuje macierz
 	for(int i = 0; i < n; i++)
 	{
-		printf("| ");
+		//printf("| ");
 
 		for(int j = 0; j < n; j++)
-			printf("%g ", matrix[i][j]);
+			printf("%.3f ", matrix[i][j]);
 
-		printf("|\n");
+		printf("\n");
 	}
 
 	printf("\nMatrix %dx%d\n\n", n, n);
-}
-
-void print_vec(double *vec, int n)
-{
-	printf("\n[ ");
-
-	for(int i = 0; i < n; i++)
-		printf("%g ", vec[i]);
-
-	printf("]\n");
-}
-
-double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
-{
-	//mnozy macierz przez wektor
-	double *result_vec = calloc(n, sizeof(double));
-
-	for(int i = 0; i < n; i++)
-	{
-		for(int j = 0; j < n; j++)
-			result_vec[i] += matrix[i][j]*vec[j]; 
-	}
-
-	return result_vec;
-}
-
-double multiply_vec_by_vec(double *vec, double *vecT, int n)
-{
-	//mnozy wektor przez wektor
-	double result = 0;
-
-	for(int i = 0; i < n; i++)
-		result += vecT[i]*vec[i];
-
-	return result;
-}
-
-double *create_initial_vec(double **D_matrix, int D_norm, int n)
-{
-	//tworzy wektor poczatkowy
-	double *initial_vec = malloc(sizeof(double) * n);
-
-	for(int i = 0; i < n; i++)
-		initial_vec[i] = D_matrix[i][i]/sqrt((double)D_norm);
-	
-	return initial_vec;
-}
-
-void subtract_vec(double *vec, double *coef_vec, double coef, int n)
-{
-	//operacja vec - coef_vec * coef
-	for(int i = 0; i < n; i++)
-		vec[i] -= coef*coef_vec[i];
-}
-
-void divide_vec(double *vec, double coef, int n)
-{
-	//dzieli vec przez wspolczynnik
-	for(int i = 0; i < n; i++)
-		vec[i] /= coef;
-}
-
-void copy_vec(double *src_vec, double *dest_vec, int n)
-{
-	for(int i = 0; i < n; i++)
-		dest_vec[i] = src_vec[i];
 }
 
 void calculate_coefs(double **L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k)
@@ -269,3 +180,142 @@ void calculate_coefs(double **L_matrix, double *initial_vec, double *prev_initia
 
 	free(residual_vec);
 }
+
+double **create_G_matrix(double **T_matrix, int n, int x)
+{
+	//obliczamy promien
+	double r = sqrt(pow(T_matrix[x][x], 2) + pow(T_matrix[x+1][x], 2));
+
+	//obliczamy sinus i cosinus
+	double s = T_matrix[x+1][x]/r;
+	double c = T_matrix[x][x]/r;
+
+	//tworzymy transponowana macierz rotacji Givensa
+	double **G_matrix = malloc(sizeof(double*) * n);
+	
+	for(int i = 0; i < n; i++)
+			G_matrix[i] = calloc(n, sizeof(double));
+
+	for(int i = 0; i < n; i++)
+		G_matrix[i][i] = 1.0L;
+
+	G_matrix[x][x] = c;
+	G_matrix[x+1][x+1] = c;
+	G_matrix[x][x+1] = s;
+	G_matrix[x+1][x] = -s;	
+
+	return G_matrix;
+}
+
+void transpose_matrix(double **matrix, int n)
+{
+	//tranospozycja macierzy 
+	for(int i = 0; i < n; i++) 
+    	{
+		//przechodzimy wszystkie elementy poddiagonalne i zamieniamy miejscami ij, ji
+        	for(int j = i + 1; j < n; j++)
+        	{
+            		double temp = matrix[i][j];
+            		matrix[i][j] = matrix[j][i];
+            		matrix[j][i] = temp;
+        	}
+    	}
+}
+
+
+void copy_matrix(double **src_matrix, double **dest_matrix, int n)
+{
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+			dest_matrix[i][j] = src_matrix[i][j];
+	}
+}
+
+double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
+{
+	double **result_matrix = malloc(sizeof(double*) * n);
+
+	for(int i = 0; i < n; i++)
+		result_matrix[i] = calloc(n, sizeof(double));
+
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+		{	
+			for(int k = 0; k < n; k++)
+					result_matrix[i][j] += left_matrix[i][k]*right_matrix[k][j];
+		}
+	}
+
+	return result_matrix;
+}
+
+void force_zeros(double **matrix, int n, double margin)
+{
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+			if(i != j && matrix[i][j] <= margin && matrix[i][j] >= -margin)
+					matrix[i][j] = 0.f;
+	}
+
+}
+
+void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
+{
+	//tworzy transponowana macierz rotacji Givensa
+	double **G_matrix = create_G_matrix(T_matrix, n, i);
+
+	//tworzy poprzez rekurencje macierz trojkatna gorna
+	double **R_matrix = multiply_mtx_by_mtx(G_matrix, T_matrix, n); 
+
+	copy_matrix(R_matrix, T_matrix, n);
+
+	//transponujemy macierz aby otrzymac zwykla macierz rotacji Givensa
+	transpose_matrix(G_matrix, n);
+
+	free(R_matrix);
+
+	//przy pierwszym przejsciu funkcje kopiujemy macierz rotacji Givensa do macierzy Q
+	if(i == 0)
+		copy_matrix(G_matrix, Q_matrix, n);
+	
+	//pozniej mnozymy kazda otrzymana macierz rotacji Givensa przez wczesniejsz, na koniec otrzymamy iloraz wszystkich macierzy rotacji Givensa
+	else
+	{
+		double ** new_Q_matrix = multiply_mtx_by_mtx(Q_matrix, G_matrix, n);
+		copy_matrix(new_Q_matrix, Q_matrix, n);
+		free(new_Q_matrix);
+	}
+
+	i++;
+
+	if(i < n-1)
+		calculate_eigenvalue(T_matrix, Q_matrix, n, i);
+
+	else if(i == n-1)
+	{
+		//tworzymy nowa macierz tridiagonalna T' i kopiujemy ja do starej macierzy T
+		double **new_T_matrix = multiply_mtx_by_mtx(T_matrix, Q_matrix, n);
+		copy_matrix(new_T_matrix, T_matrix, n);
+		//pozbywamy sie bledow numerycznych
+		force_zeros(T_matrix, n, 0.01);
+		free(new_T_matrix);
+	}	
+}
+
+int compare(const void *a, const void *b)
+{
+	//funkcja porownawcza do qsort
+	double *n = (double *)a;
+	double *m = (double *)b;
+
+	if(*n > *m)
+		return 1;
+	else if(*n < *m)
+		return -1;
+	
+	return 0;
+}
+
