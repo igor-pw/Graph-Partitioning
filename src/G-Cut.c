@@ -24,6 +24,8 @@ int main(int argc, char **argv)
 	double **A_matrix = create_A_matrix(in, &nodes);	
 	printf("Macierz Sasiedztwa\n");
 
+	fclose(in);
+
 	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
 	double **D_matrix = create_D_matrix(A_matrix, nodes, &D_norm);
 	printf("Macierz Diagonalna\n");
@@ -32,10 +34,14 @@ int main(int argc, char **argv)
 	double **L_matrix = subtract_matrix(D_matrix, A_matrix, nodes);
 	printf("Macierz Laplace'a\n");	
 
+	free_matrix(A_matrix, nodes);
+
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_matrix, D_norm, nodes);
 	printf("Wektor poczatkowy\n");	
 
+	free_matrix(D_matrix, nodes);
+	
 	//poprzedni wektor poczatkowy
 	double *prev_initial_vec = malloc(sizeof(double) * nodes); //aktualnie pusty		
 
@@ -47,9 +53,15 @@ int main(int argc, char **argv)
 	calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
 	printf("Wspolczynniki alfa i beta\n");
 
+	free(initial_vec);
+	free(prev_initial_vec);
+
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
 	double **T_matrix = tri_matrix(alfa_coefs, beta_coefs, ITERATIONS);
 	printf("Macierz Tridiagonalna\n");
+
+	free(alfa_coefs);
+	free(beta_coefs);
 
 	//macierz ortogonalna, poczatkowo pusta	
 	double **Q_matrix = malloc(sizeof(double*) * ITERATIONS);
@@ -61,6 +73,9 @@ int main(int argc, char **argv)
 	for(int i = 0; i < ITERATIONS/2; i++)
 		calculate_eigenvalue(T_matrix, Q_matrix, ITERATIONS, 0);
 
+	free_matrix(Q_matrix, ITERATIONS);
+
+
 	printf("Wartosci wlasne\n");
 
 	//kopiujemy wartosci wlasne do wektora
@@ -69,36 +84,38 @@ int main(int argc, char **argv)
 	for(int i = 0; i < ITERATIONS; i++)
 		eigenvalues_vec[i] = T_matrix[i][i];
 
-	//Szukana wartosc wlasna
+	free_matrix(T_matrix, ITERATIONS);
+
+	//szukana wartosc wlasna
 	double eigenvalue = find_smallest_eigenvalue(eigenvalues_vec, ITERATIONS);
 	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
 
-	printf("%g\n", eigenvalue);
+	free(eigenvalues_vec);
 
-	print_matrix(L_matrix, nodes);
+	//wektor wlasny, nie wiem czy jest poprawnie policzony
+	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.075);
+	printf("Wektor wlasny\n");
 
-	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.001);
-
-	print_vec(eigenvector, nodes);
-
+	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
-	
-	if(eigenvector != NULL)
-		print_vec(eigenvector, nodes);
 
+	printf("Wartosc wlasna: %g\n", eigenvalue);
+	//print_vec(eigenvector, nodes);
+
+	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
-
-	printf("median: %g\n", median);
-
-	//policzyc mediane z wartosci wektorow -> podzial grafu na 2 czesci
+	printf("Mediana: %g\n", median);
 
 	int counter = 0;
 
 	while(eigenvector[counter] < median)
 		counter++;
 
-	printf("counter: %d\n", counter);
-	
+	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
+
+	//gdzie jeszcze nie jest zwalniana pamiec
+	free_matrix(L_matrix, nodes);
+	free(eigenvector);
 
 	return 0;
 }

@@ -12,3 +12,4 @@ void copy_vec(double *src_vec, double *dest_vec, int n);
 double find_smallest_eigenvalue(double *vec, int n);
 double *calculate_eigenvector(double eigenvalue, int n, double margin);
 double calculate_median(double *eigenvector, int groups, int n); 
+int compare(const void *a, const void *b);

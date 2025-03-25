@@ -1,8 +1,6 @@
 #include "headers/matrix.h"
 #include <ctype.h>
 
-//nie wiem czemu nie wczytuje z bibliteki
-#define M_PI 3.14159265358979323846
 
 double **create_A_matrix(FILE *in, int *nodes)
 {
@@ -277,7 +275,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	//transponujemy macierz aby otrzymac zwykla macierz rotacji Givensa
 	transpose_matrix(G_matrix, n);
 
-	free(R_matrix);
+	free_matrix(R_matrix, n);
 
 	//przy pierwszym przejsciu funkcje kopiujemy macierz rotacji Givensa do macierzy Q
 	if(i == 0)
@@ -288,7 +286,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	{
 		double ** new_Q_matrix = multiply_mtx_by_mtx(Q_matrix, G_matrix, n);
 		copy_matrix(new_Q_matrix, Q_matrix, n);
-		free(new_Q_matrix);
+		free_matrix(new_Q_matrix, n);
 	}
 
 	i++;
@@ -303,10 +301,10 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 		copy_matrix(new_T_matrix, T_matrix, n);
 		//pozbywamy sie bledow numerycznych
 		force_zeros(T_matrix, n, 0.01);
-		free(new_T_matrix);
+		free_matrix(new_T_matrix, n);
 	}	
 }
-
+/*
 double **create_I_matrix(int n, double coef)
 {
 	//stworzenie macierzy jednostkowej przemnozonej przez wspolczynnik
@@ -320,129 +318,12 @@ double **create_I_matrix(int n, double coef)
 
 	return I_matrix;
 }
+*/
 
-double matrix_norm(double ** matrix, int n)
+void free_matrix(double **matrix, int n)
 {
-	double max = matrix[0][0];
+	for(int i = 0; i < n; i++)
+		free(matrix[i]);
 
-	for(int i = 1; i < n; i++)
-	{
-		if(matrix[i][i] > max)
-			max = matrix[i][i];
-	}
-
-	printf("min: %g\n", max);
-
-	max *= 2;
-
-	return 1/pow(max, 2);
-
-}
-
-/*
-void invert_matrix(double **L_matrix, double **X_matrix, double **I_matrix, int n, int i, int iterations)
-{
-	double **LX_matrix = multiply_mtx_by_mtx(L_matrix, X_matrix, n);	
-	double **matrix = subtract_matrix(I_matrix, LX_matrix, n);
-
-	//printf("new_X_matrix\n");
-	//print_matrix(LX_matrix, n);
-	//print_matrix(matrix, n);
-
-	double **new_X_matrix = multiply_mtx_by_mtx(X_matrix, matrix, n);
-	copy_matrix(new_X_matrix, X_matrix, n);
-	//print_matrix(X_matrix, n);
-	free(new_X_matrix);
-
-	i++;
-
-	if(i < iterations)
-		invert_matrix(L_matrix, X_matrix, I_matrix, n, i, iterations);
-	
-}*/
-
-int compare(const void *a, const void *b)
-{
-	//funkcja porownawcza do qsort
-	double *n = (double *)a;
-	double *m = (double *)b;
-
-	if(*n > *m)
-		return 1;
-	else if(*n < *m)
-		return -1;
-	
-	return 0;
-}
-
-double *calculate_eigenvector(double eigenvalue, int n, double margin)
-{
-	double *eigenvector = malloc(sizeof(double) * n);
-	int N = sqrt(n);
-
-	printf("N: %d\n", N);
-
-	double p, q;	
-	bool found = false;
-
-	for(int i = 1; i < N; i++)
-	{
-		for(int j = 1; j < N; j++)
-		{
-			if(fabs(eigenvalue-4+2*cos((i*M_PI)/(n+1))+2*cos((j*M_PI)/(n+1))) < margin)
-			{
-				p = i;
-				q = j;
-				printf("p: %g, q: %g\n", p, q); 
-				
-				found = true;
-				break;
-			}
-		}
-
-		if(found)
-			break;
-	}
-
-	if(!found)
-	{
-		printf("Nie znaleziono odpowiednich wartosci\n");
-		return NULL;
-	}
-
-	int index;
-
-	for(int i = 1; i <= N+2; i++)
-	{
-		for(int j = 1; j <= N+2; j++)
-		{
-			index = j + (i-1)*N-1;
-			printf("index: %d\n", index);	
-
-			if(index < n)
-				eigenvector[index] = sin((p*M_PI*i)/(N+1))*sin((q*M_PI*j)/(N+1));
-		}
-	}	
-
-	return eigenvector;
-}
-
-double calculate_median(double *eigenvector, int groups, int n)
-{	
-	double median;
-
-	printf("%d\n", n/2);
-
-	if(n % 2 == 1)
-	{
-		median = eigenvector[n/groups+1];
-		printf("nieparzysta\n");
-	}
-	else if(n % 2 == 0)
-	{
-		median = (eigenvector[n/groups] + eigenvector[n/groups+1])/2;
-		printf("parzysta\n");
-	}
-
-	return median;
+	free(matrix);
 }

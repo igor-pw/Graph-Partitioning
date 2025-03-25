@@ -20,13 +20,7 @@ double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
 void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void force_zeros(double **matrix, int n, double margin);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
-double **create_I_matrix(int n, double coef);
-double matrix_norm(double **matrix, int n);
-void invert_matrix(double **L_matrix, double **X_matrix, double **I_matrix, int n, int i, int iterations);
-int compare(const void *a, const void *b);
-void replace_rows(double **matrix, double *vec, int col, int row, int n);
-void gauss_elimination(double **matrix, double *vec, int n);
-double sum(double **matrix, double *x, int i, int n);
-void backsubst(double *eigenvector, double **matrix, double *vec, int n);
+//double **create_I_matrix(int n, double coef);
+void free_matrix(double **matrix, int n);
 
 #endif

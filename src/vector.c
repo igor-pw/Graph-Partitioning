@@ -1,5 +1,8 @@
 #include "headers/vector.h"
 
+//nie wiem czemu nie wczytuje z bibliteki
+#define M_PI 3.14159265358979323846
+
 double vec_norm(double *vec, int n)
 {
         //normalizacja wektora (dlugosc)
@@ -100,4 +103,84 @@ double find_smallest_eigenvalue(double *vec, int n)
 	}
 
 	return eigenvalue;
+}
+
+double *calculate_eigenvector(double eigenvalue, int n, double margin)
+{
+        double *eigenvector = malloc(sizeof(double) * n);
+        int N = sqrt(n);
+
+        double p, q;
+        bool found = false;
+
+        //prawdopodobnie trzeba ulepszyc proces szukania p i q, albo porownywac wyniki roznych p i q
+
+        for(int i = 1; i < N; i++)
+        {
+                for(int j = 1; j < N; j++)
+                {
+                        if(fabs(eigenvalue-4+2*cos((i*M_PI)/(n+1))+2*cos((j*M_PI)/(n+1))) < margin)
+                        {
+                                p = i;
+                                q = j;
+                                //printf("p: %g, q: %g\n", p, q);
+
+                                found = true;
+                                break;
+                        }
+                }
+
+                if(found)
+                        break;
+        }
+
+        if(!found)
+        {
+                printf("Nie znaleziono odpowiednich wartosci\n");
+                return NULL;
+        }
+
+        int index;
+
+        for(int i = 1; i <= N+2; i++)
+        {
+                for(int j = 1; j <= N+2; j++)
+                {
+                        index = j + (i-1)*N-1;
+
+                        if(index < n)
+                                eigenvector[index] = sin((p*M_PI*i)/(N+1))*sin((q*M_PI*j)/(N+1));
+                }
+        }
+
+        //printf("index: %d\n", index);
+
+        return eigenvector;
+}
+
+double calculate_median(double *eigenvector, int groups, int n)
+{
+        double median;
+
+        if(n % 2 == 1)
+                median = eigenvector[n/groups+1];
+
+        else if(n % 2 == 0)
+                median = (eigenvector[n/groups] + eigenvector[n/groups+1])/2;
+
+        return median;
+}
+
+int compare(const void *a, const void *b)
+{
+	//funkcja porownawcza do qsort
+	double *n = (double *)a;
+	double *m = (double *)b;
+
+	if(*n > *m)
+		return 1;
+	else if(*n < *m)
+		return -1;
+	
+	return 0;
 }
