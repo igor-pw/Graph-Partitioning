@@ -9,4 +9,6 @@ double *create_initial_vec(double **D_matrix, int D_norm, int n);
 void subtract_vec(double *vec, double *coef_vec, double coef, int n);
 void divide_vec(double *vec, double coef, int n);
 void copy_vec(double *src_vec, double *dest_vec, int n);
-
+double find_smallest_eigenvalue(double *vec, int n);
+double *calculate_eigenvector(double eigenvalue, int n, double margin);
+double calculate_median(double *eigenvector, int groups, int n); 

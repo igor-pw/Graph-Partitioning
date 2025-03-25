@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 	double **T_matrix = tri_matrix(alfa_coefs, beta_coefs, ITERATIONS);
 	printf("Macierz Tridiagonalna\n");
 
-
 	//macierz ortogonalna, poczatkowo pusta	
 	double **Q_matrix = malloc(sizeof(double*) * ITERATIONS);
 
@@ -63,8 +62,6 @@ int main(int argc, char **argv)
 		calculate_eigenvalue(T_matrix, Q_matrix, ITERATIONS, 0);
 
 	printf("Wartosci wlasne\n");
-	//wypisanie macierzy tridiagonalnej
-	//print_matrix(T_matrix, ITERATIONS);
 
 	//kopiujemy wartosci wlasne do wektora
 	double *eigenvalues_vec = malloc(sizeof(double) * ITERATIONS);
@@ -72,9 +69,36 @@ int main(int argc, char **argv)
 	for(int i = 0; i < ITERATIONS; i++)
 		eigenvalues_vec[i] = T_matrix[i][i];
 
-	print_vec(eigenvalues_vec, ITERATIONS);
+	//Szukana wartosc wlasna
+	double eigenvalue = find_smallest_eigenvalue(eigenvalues_vec, ITERATIONS);
+	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
 
-	//znalezc najmniejsza dodatnia wartosc wlana, stworzyc wektory wlasne, posortowac wartosci wektorow wlasnych, policzyc mediane z wartosci wektorow -> podzial grafu na 2 czesci
+	printf("%g\n", eigenvalue);
+
+	print_matrix(L_matrix, nodes);
+
+	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.001);
+
+	print_vec(eigenvector, nodes);
+
+	qsort(eigenvector, nodes, sizeof(double), compare);
+	
+	if(eigenvector != NULL)
+		print_vec(eigenvector, nodes);
+
+	double median = calculate_median(eigenvector, 2, nodes);
+
+	printf("median: %g\n", median);
+
+	//policzyc mediane z wartosci wektorow -> podzial grafu na 2 czesci
+
+	int counter = 0;
+
+	while(eigenvector[counter] < median)
+		counter++;
+
+	printf("counter: %d\n", counter);
+	
 
 	return 0;
 }

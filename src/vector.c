@@ -27,7 +27,7 @@ void print_vec(double *vec, int n)
         printf("\n[ ");
 
         for(int i = 0; i < n; i++)
-                printf("%g ", vec[i]);
+                printf("%.15f ", vec[i]);
 
         printf("]\n");
 }
@@ -86,3 +86,18 @@ void copy_vec(double *src_vec, double *dest_vec, int n)
                 dest_vec[i] = src_vec[i];
 }
 
+double find_smallest_eigenvalue(double *vec, int n)
+{
+	//wartosci wlasne sa uporzadkowane od najwiekszej wartosci do najmniejszej wzgledem wartosci bezwzglednej
+	//dlatego szukamy od konca najmniejszej wartosci dodatniej, ktora bedzie szukana wartoscia wlasna macierzy
+	
+	double eigenvalue = -1;
+	
+	while(eigenvalue < 0)
+	{
+		eigenvalue = vec[n-1];
+	       	n--;	
+	}
+
+	return eigenvalue;
+}
