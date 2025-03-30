@@ -2,12 +2,13 @@
 #define _MATRIX_H_
 
 #include "vector.h"
+#include "graph.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
 
-double **create_A_matrix(FILE *in, int *nodes);
+double **create_A_matrix(FILE *in, int *nodes, node_t *t);
 double **create_D_matrix(double **matrix, int A_size, int *D_norm);
 double **subtract_matrix(double **matrix1, double **matrix2, int n);
 double **tri_matrix(double *a, double *b, int k);
@@ -21,6 +22,8 @@ void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void force_zeros(double **matrix, int n, double margin);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
 //double **create_I_matrix(int n, double coef);
+void assing_eigen(node_t *t, double *eigenvector, int size, int n);
+void assing_group(node_t *t, double mediana, int size);
 void free_matrix(double **matrix, int n);
 
 #endif

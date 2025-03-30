@@ -1,11 +1,15 @@
+#ifndef _GRAPH_H_
+#define _GRAPH_H_
 #include "matrix.h"
 
 typedef struct node
-{
-	int nr, x, y, group, index;
+{	//tu by sie zastanowil bo raczej x i y nie sa potrzebne skoro to jest w tablicy
+	int nr, x, y, group, index, in;
 	double eigenvalue;
-} node_t*;
-
+} *node_t;
+/*
 void scan_flags(int argc, char **argc, char *flag_value);
 void divide_graph(double **A_matrix, node_t **nodes, int n);
 void print_input(double **A_matrix, node_t **nodes, char *file_name ,int n);
+*/
+#endif

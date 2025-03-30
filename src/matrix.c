@@ -1,36 +1,50 @@
 #include "headers/matrix.h"
+#include "headers/graph.h"
 #include <ctype.h>
+#define am 16386
 
-
-double **create_A_matrix(FILE *in, int *nodes)
+double **create_A_matrix(FILE *in, int *nodes, node_t * t)
 {
 	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
 
 	int size = 0;
-	int nr;
 	char c = ';';
-
+	int position[am];
+	int position2[am];
 	while(!isspace(c))
 	{
-		if(fscanf(in, "%d%c", &nr, &c) == 2)
+		if(fscanf(in, "%d%c", &position[size], &c) == 2)
 			size++;
 	}
 
 	c = ';';
-	int temp;
+	int temp = 0;
 
 	while(!isspace(c))
 	{		
-		if(fscanf(in, "%d%c", &temp, &c) == 2)
-			continue;
+		if(fscanf(in, "%d%c", &position2[temp], &c) == 2)
+			temp++;
+	}
+	int cl = 0;
+	for(int i = 1; i<temp;i++){
+		int line = position2[i] - position2[i-1];
+		if(line != 0){
+			for(int j = position2[i-1]; j<position2[i];j++){
+			int x = position[j];
+			t[cl][x].x = x;
+			t[cl][x].y = cl;
+			t[cl][x].in = 1;
+			}
+		}
+		cl++;
 	}
 
 	printf("nodes: %d\n", size);
 	
-	int index[16386]; 
+	int index[am]; 
 
 	//zredukowac do jednej tablicy
-	int index2[16386];
+	int index2[am];
 	
 	c = ';';
 	int counter = 0;
@@ -319,6 +333,41 @@ double **create_I_matrix(int n, double coef)
 	return I_matrix;
 }
 */
+
+
+void assing_eigen(node_t *t, double *eigenvector, int size, int n){
+	int c =0;
+	for(int i =0; i <size; i++){
+		for(int j =0; j<size; j++){
+			if(t[i][j].in ==1){
+			t[i][j].eigenvalue=eigenvector[c];
+			c++;
+			}
+		}
+	}
+}
+
+void assing_group(node_t *t, double mediana, int size){
+	int c1 =0;
+	int c2 =0;
+	for(int i =0; i <size; i++){
+		for(int j =0; j<size; j++){
+			if(t[i][j].in ==1){
+				if(t[i][j].eigenvalue < mediana){
+					t[i][j].group =1;
+					c1++;
+				}
+
+				else{
+					t[i][j].group=2;
+					c2++;
+				}
+			}
+		}
+	}
+	printf("c1 = %d, \t c2 = %d\n",c1,c2);
+	
+}
 
 void free_matrix(double **matrix, int n)
 {

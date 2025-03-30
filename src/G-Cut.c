@@ -1,6 +1,8 @@
 #include "headers/matrix.h"
+#include "headers/graph.h"
+#define ITERATIONS 10 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
-#define ITERATIONS 50
+
 
 int main(int argc, char **argv)
 {
@@ -14,16 +16,33 @@ int main(int argc, char **argv)
 	int n = 0;
 	int nodes = 0;
 	int D_norm = 0;
-
 	fscanf(in, "%d\n", &n);
 	
 	if(n == 0)
 		return 2;
 
-	//macierz sasiedztwa
-	double **A_matrix = create_A_matrix(in, &nodes);	
-	printf("Macierz Sasiedztwa\n");
+	node_t *t = malloc(n * sizeof(node_t));
+		for (int i = 0; i < n; ++i)
+    		t[i] = malloc(n * sizeof(struct node));
+	
 
+	//macierz sasiedztwa
+	double **A_matrix = create_A_matrix(in, &nodes, t);	
+	printf("Macierz Sasiedztwa\n");
+	printf("x = %d\n",t[3][1].x);
+	//tu do porawy Åe trzeba dac do struktury zmienna jest wieszcholek 
+	for(int i =0; i<n;i++){
+		for(int j = 0; j<n;j++){
+			if(t[i][j].in != 0)
+				printf("1 ");
+			else
+				printf("0 ");
+		}
+		printf("\n");
+	}
+
+
+	
 	fclose(in);
 
 	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
@@ -95,16 +114,41 @@ int main(int argc, char **argv)
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
 	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.075);
 	printf("Wektor wlasny\n");
+	
+	assing_eigen(t,eigenvector,n,nodes);
+	/*
+	for(int i = 0; i <n;i++){
+		for(int j =0; j <n ;j++){
+			if(t[i][j].in ==1)
+				printf("%3lf ",t[i][j].eigenvalue);
+			else
+				printf("0    ");
+		}
+		printf("\n");
+	}
+	*/
 
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
-	//print_vec(eigenvector, nodes);
+	print_vec(eigenvector, nodes);
 
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
-	printf("Mediana: %g\n", median);
+	printf("Mediana: %lf\n", median);
+// !!!!!!!!!!!!!!!! Dziala ale trzeba pomyslec jak to zrobic gdy jest sporo wartosci o tej samej wartosci !!!!!!!!!!!!!!!!!!!!	
+	assing_group(t,median,n);
+	
+	for(int i = 0; i <n;i++){
+		for(int j =0; j <n ;j++){
+			if(t[i][j].in ==1)
+				printf("%d ",t[i][j].group);
+			else
+				printf("0 ");
+		}
+		printf("\n");
+	}
 
 	int counter = 0;
 
@@ -119,3 +163,4 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
