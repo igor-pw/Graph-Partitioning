@@ -4,9 +4,9 @@
 
 typedef struct node
 {	//tu by sie zastanowil bo raczej x i y nie sa potrzebne skoro to jest w tablicy
-	int nr, x, y, group, index, in;
+	int nr, x, y, group, index;
 	double eigenvalue;
-} *node_t;
+} * node_t;
 /*
 void scan_flags(int argc, char **argc, char *flag_value);
 void divide_graph(double **A_matrix, node_t **nodes, int n);

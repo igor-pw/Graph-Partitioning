@@ -18,20 +18,32 @@ int main(int argc, char **argv)
 	int D_norm = 0;
 	fscanf(in, "%d\n", &n);
 	
-	if(n == 0)
+	if(n == 0){
 		return 2;
+	}
 
-	node_t *t = malloc(n * sizeof(node_t));
-		for (int i = 0; i < n; ++i)
-    		t[i] = malloc(n * sizeof(struct node));
+	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	
 
 	//macierz sasiedztwa
-	double **A_matrix = create_A_matrix(in, &nodes, t);	
+	double **A_matrix = create_A_matrix(in, &nodes, &t);	
+	printf("\t %d, %d \n",t[55].x,t[55].y);
 	printf("Macierz Sasiedztwa\n");
-	printf("x = %d\n",t[3][1].x);
+	int lu = 0;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			if(t[lu].y == i && t[lu].x ==j){
+				printf("1 ");
+				lu++;
+			}
+			else
+				printf("0 ");
+		}
+		printf("\n");
+	}
+//	printf("x = %d\n",t[3][1].x);
 	//tu do porawy Åe trzeba dac do struktury zmienna jest wieszcholek 
-	for(int i =0; i<n;i++){
+	/*for(int i =0; i<n;i++){
 		for(int j = 0; j<n;j++){
 			if(t[i][j].in != 0)
 				printf("1 ");
@@ -40,6 +52,7 @@ int main(int argc, char **argv)
 		}
 		printf("\n");
 	}
+	*/
 
 
 	
@@ -115,7 +128,7 @@ int main(int argc, char **argv)
 	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.075);
 	printf("Wektor wlasny\n");
 	
-	assing_eigen(t,eigenvector,n,nodes);
+	assing_eigen(t,eigenvector,nodes);
 	/*
 	for(int i = 0; i <n;i++){
 		for(int j =0; j <n ;j++){
@@ -138,17 +151,24 @@ int main(int argc, char **argv)
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
 // !!!!!!!!!!!!!!!! Dziala ale trzeba pomyslec jak to zrobic gdy jest sporo wartosci o tej samej wartosci !!!!!!!!!!!!!!!!!!!!	
-	assing_group(t,median,n);
+	assing_group(t,median,nodes);
 	
-	for(int i = 0; i <n;i++){
-		for(int j =0; j <n ;j++){
-			if(t[i][j].in ==1)
-				printf("%d ",t[i][j].group);
+	lu = 0;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			if(t[lu].y == i && t[lu].x ==j){
+				printf("%d ",t[lu].group);
+				lu++;
+			}
 			else
 				printf("0 ");
 		}
 		printf("\n");
 	}
+
+
+
+	
 
 	int counter = 0;
 

@@ -3,7 +3,7 @@
 #include <ctype.h>
 #define am 16386
 
-double **create_A_matrix(FILE *in, int *nodes, node_t * t)
+double **create_A_matrix(FILE *in, int *nodes, node_t *t)
 {
 	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
 
@@ -19,22 +19,31 @@ double **create_A_matrix(FILE *in, int *nodes, node_t * t)
 
 	c = ';';
 	int temp = 0;
+	*t = (node_t)malloc(size * sizeof(struct node));
+	printf("1\n");
 
 	while(!isspace(c))
 	{		
 		if(fscanf(in, "%d%c", &position2[temp], &c) == 2)
 			temp++;
 	}
+	printf("1\n");
 	int cl = 0;
+	int c2 = 0;
 	for(int i = 1; i<temp;i++){
 		int line = position2[i] - position2[i-1];
 		if(line != 0){
+	printf("1\n");
 			for(int j = position2[i-1]; j<position2[i];j++){
 			int x = position[j];
-			t[cl][x].x = x;
-			t[cl][x].y = cl;
-			t[cl][x].in = 1;
+			(*t)[c2].x = x;
+			(*t)[c2].y = cl;
+			(*t)[c2].nr = c2;
+			(*t)[c2].index = c2;
+			(*t)[c2].eigenvalue = 0.0;
+			c2++;
 			}
+			printf("%d, %d\n",(*t)[cl].x,(*t)[cl].y);
 		}
 		cl++;
 	}
@@ -335,39 +344,25 @@ double **create_I_matrix(int n, double coef)
 */
 
 
-void assing_eigen(node_t *t, double *eigenvector, int size, int n){
-	int c =0;
-	for(int i =0; i <size; i++){
-		for(int j =0; j<size; j++){
-			if(t[i][j].in ==1){
-			t[i][j].eigenvalue=eigenvector[c];
-			c++;
-			}
-		}
-	}
+void assing_eigen(node_t t, double *eigenvector, int n){
+	for(int i =0; i <n; i++)
+			t[i].eigenvalue=eigenvector[i];
 }
 
-void assing_group(node_t *t, double mediana, int size){
-	int c1 =0;
-	int c2 =0;
-	for(int i =0; i <size; i++){
-		for(int j =0; j<size; j++){
-			if(t[i][j].in ==1){
-				if(t[i][j].eigenvalue < mediana){
-					t[i][j].group =1;
-					c1++;
+void assing_group(node_t t, double mediana, int n){
+
+		for(int i =0; i<n; i++){
+				if(t[i].eigenvalue < mediana){
+					t[i].group =1;
 				}
 
 				else{
-					t[i][j].group=2;
-					c2++;
+					t[i].group=2;
 				}
-			}
-		}
 	}
-	printf("c1 = %d, \t c2 = %d\n",c1,c2);
 	
 }
+
 
 void free_matrix(double **matrix, int n)
 {
