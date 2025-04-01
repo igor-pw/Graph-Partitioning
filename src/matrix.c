@@ -20,20 +20,17 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t)
 	c = ';';
 	int temp = 0;
 	*t = (node_t)malloc(size * sizeof(struct node));
-	printf("1\n");
 
 	while(!isspace(c))
 	{		
 		if(fscanf(in, "%d%c", &position2[temp], &c) == 2)
 			temp++;
 	}
-	printf("1\n");
 	int cl = 0;
 	int c2 = 0;
 	for(int i = 1; i<temp;i++){
 		int line = position2[i] - position2[i-1];
 		if(line != 0){
-	printf("1\n");
 			for(int j = position2[i-1]; j<position2[i];j++){
 			int x = position[j];
 			(*t)[c2].x = x;
@@ -43,12 +40,10 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t)
 			(*t)[c2].eigenvalue = 0.0;
 			c2++;
 			}
-			printf("%d, %d\n",(*t)[cl].x,(*t)[cl].y);
 		}
 		cl++;
 	}
 
-	printf("nodes: %d\n", size);
 	
 	int index[am]; 
 
@@ -371,7 +366,6 @@ void connections(node_t t, int n, double **A_matrix){
 			if(t[i].group == t[j].group && A_matrix[i][j] == 1){
 				v[count] = j;
 				count++;
-				printf("%d - %d\n",i,j);
 			}
 		}
 		t[i].connected=malloc(count*sizeof(int));

@@ -31,36 +31,7 @@ int main(int argc, char **argv)
 	for(int i =0; i < nodes; i++)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
 	copy_matrix(A_matrix, Macierz_s, nodes);
-	printf("\t %d, %d \n",t[55].x,t[55].y);
 	printf("Macierz Sasiedztwa\n");
-	/*
-	int lu = 0;
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < n; j++){
-			if(t[lu].y == i && t[lu].x ==j){
-				printf("1 ");
-				lu++;
-			}
-			else
-				printf("0 ");
-		}
-		printf("\n");
-	}
-	*/
-//	printf("x = %d\n",t[3][1].x);
-	//tu do porawy Åe trzeba dac do struktury zmienna jest wieszcholek 
-	/*for(int i =0; i<n;i++){
-		for(int j = 0; j<n;j++){
-			if(t[i][j].in != 0)
-				printf("1 ");
-			else
-				printf("0 ");
-		}
-		printf("\n");
-	}
-	*/
-
-
 	
 	fclose(in);
 
@@ -156,9 +127,7 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-// !!!!!!!!!!!!!!!! Dziala ale trzeba pomyslec jak to zrobic gdy jest sporo wartosci o tej samej wartosci !!!!!!!!!!!!!!!!!!!!	
 	assing_group(t,median,nodes);
-	print_matrix(Macierz_s, nodes);
 	connections(t,nodes, Macierz_s);
 	int lu = 0;
 	for(int i = 0; i < n; i++){
@@ -174,6 +143,7 @@ int main(int argc, char **argv)
 	}
 	int ngroups = 2;
 
+		printf("\n");
 	for(int k = 1; k <=ngroups; k++){
 		printf("gr. %d\n", k);
 		for(int i =0; i<nodes; i++){
@@ -190,7 +160,7 @@ int main(int argc, char **argv)
 
 	}
 
-	
+/*	
 	lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
@@ -204,7 +174,7 @@ int main(int argc, char **argv)
 		printf("\n");
 	}
 
-
+*/
 
 	
 
