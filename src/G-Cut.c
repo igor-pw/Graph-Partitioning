@@ -1,6 +1,6 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
-#define ITERATIONS 10 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
+#define ITERATIONS 100 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 
 
@@ -26,9 +26,14 @@ int main(int argc, char **argv)
 	
 
 	//macierz sasiedztwa
-	double **A_matrix = create_A_matrix(in, &nodes, &t);	
+	double **A_matrix = create_A_matrix(in, &nodes, &t);
+	double **Macierz_s = malloc(sizeof(double*)*nodes);
+	for(int i =0; i < nodes; i++)
+		Macierz_s[i]=malloc(sizeof(double)*nodes);
+	copy_matrix(A_matrix, Macierz_s, nodes);
 	printf("\t %d, %d \n",t[55].x,t[55].y);
 	printf("Macierz Sasiedztwa\n");
+	/*
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
@@ -41,6 +46,7 @@ int main(int argc, char **argv)
 		}
 		printf("\n");
 	}
+	*/
 //	printf("x = %d\n",t[3][1].x);
 	//tu do porawy Åe trzeba dac do struktury zmienna jest wieszcholek 
 	/*for(int i =0; i<n;i++){
@@ -152,6 +158,38 @@ int main(int argc, char **argv)
 	printf("Mediana: %lf\n", median);
 // !!!!!!!!!!!!!!!! Dziala ale trzeba pomyslec jak to zrobic gdy jest sporo wartosci o tej samej wartosci !!!!!!!!!!!!!!!!!!!!	
 	assing_group(t,median,nodes);
+	print_matrix(Macierz_s, nodes);
+	connections(t,nodes, Macierz_s);
+	int lu = 0;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			if(t[lu].y == i && t[lu].x ==j){
+				printf("1 ");
+				lu++;
+			}
+			else
+				printf("0 ");
+		}
+		printf("\n");
+	}
+	int ngroups = 2;
+
+	for(int k = 1; k <=ngroups; k++){
+		printf("gr. %d\n", k);
+		for(int i =0; i<nodes; i++){
+			int vle = t[i].vle;
+			if( t[i].group == k && vle != 0){
+				printf("%d - [",i);
+				int tmp = vle-1;
+					for(int j = 0; j < tmp; j++)
+						printf("%d,",t[i].connected[j]);
+					printf("%d]\n",t[i].connected[tmp]);
+			}
+		}
+		printf("\n");
+
+	}
+
 	
 	lu = 0;
 	for(int i = 0; i < n; i++){

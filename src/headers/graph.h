@@ -2,9 +2,9 @@
 #define _GRAPH_H_
 #include "matrix.h"
 
-typedef struct node
-{	//tu by sie zastanowil bo raczej x i y nie sa potrzebne skoro to jest w tablicy
-	int nr, x, y, group, index;
+typedef struct node{
+	int *connected;
+	int nr, x, y, group, index, vle;
 	double eigenvalue;
 } * node_t;
 /*

@@ -24,6 +24,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
 //double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
 void assing_group(node_t t, double mediana, int n);
+void connections(node_t t, int n, double **A_matrix);
 void free_matrix(double **matrix, int n);
 
 #endif

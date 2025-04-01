@@ -350,7 +350,7 @@ void assing_eigen(node_t t, double *eigenvector, int n){
 }
 
 void assing_group(node_t t, double mediana, int n){
-
+	
 		for(int i =0; i<n; i++){
 				if(t[i].eigenvalue < mediana){
 					t[i].group =1;
@@ -363,6 +363,24 @@ void assing_group(node_t t, double mediana, int n){
 	
 }
 
+void connections(node_t t, int n, double **A_matrix){
+	int v[n];
+	int count = 0;
+	for(int i =0; i < n; i++){
+		for(int j =i; j < n; j++){
+			if(t[i].group == t[j].group && A_matrix[i][j] == 1){
+				v[count] = j;
+				count++;
+				printf("%d - %d\n",i,j);
+			}
+		}
+		t[i].connected=malloc(count*sizeof(int));
+		for(int j = 0; j<count; j++)
+			t[i].connected[j]=v[j];
+		t[i].vle=count;
+		count =0;
+	}
+}
 
 void free_matrix(double **matrix, int n)
 {
