@@ -1,17 +1,45 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
-#define ITERATIONS 10 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
-
-
+#include "headers/input.h"
+#define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 int main(int argc, char **argv)
 {
-	char *file_name = argc > 1 ? argv[1] : "data/graf.csrrg";
+	Flags flags = Error;
+	int argv_index = 1;
+	char *flag_value = NULL;
+	int divide = 2;
+	double margin = 0.1;
+	char *input_name = NULL;
+	char *output_name = "output.txt";
 
-	if(file_name == NULL)
+	for(int i = 0; i < (argc-1)/2; i++)
+	{
+		void *ptr_flag_value = scan_flags(&flags, argv, argv_index);
+	
+		flag_value = (char*)ptr_flag_value;
+
+		if(flags == 1)
+			divide = atoi(flag_value);
+
+		else if(flags == 2)
+			margin = atof(flag_value);
+
+		else if(flags == 3)
+			input_name = flag_value;
+	
+		else if(flags == 4)
+			output_name = flag_value;
+	
+		argv_index += 2;
+	}
+
+	printf("%d, %g, %s, %s\n", divide, margin, input_name, output_name);
+
+	if(input_name == NULL)
 		return 1;
 		
-	FILE *in = fopen(file_name, "r");
+	FILE *in = fopen(input_name, "r");
 
 	int n = 0;
 	int nodes = 0;
@@ -157,7 +185,7 @@ int main(int argc, char **argv)
 
 	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
 
-	//gdzie jeszcze nie jest zwalniana pamiec
+	//gdzies jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
 
