@@ -1,6 +1,6 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
-#define ITERATIONS 100 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
+#define ITERATIONS 2000 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 
 
@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 	int n = 0;
 	int nodes = 0;
 	int D_norm = 0;
+	int connections1 =0;
 	fscanf(in, "%d\n", &n);
 	
 	if(n == 0){
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
 	
 
 	//macierz sasiedztwa
-	double **A_matrix = create_A_matrix(in, &nodes, &t);
+	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
 	double **Macierz_s = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
@@ -123,12 +124,13 @@ int main(int argc, char **argv)
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
 	print_vec(eigenvector, nodes);
-
+	
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
 	assing_group(t,median,nodes);
-	connections(t,nodes, Macierz_s);
+	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
+	connections(t,nodes, Macierz_s, &connections2);
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
@@ -145,15 +147,12 @@ int main(int argc, char **argv)
 
 		printf("\n");
 	for(int k = 1; k <=ngroups; k++){
-		printf("gr. %d\n", k);
+		printf("grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
 			int vle = t[i].vle;
 			if( t[i].group == k && vle != 0){
-				printf("%d - [",i);
-				int tmp = vle-1;
-					for(int j = 0; j < tmp; j++)
-						printf("%d,",t[i].connected[j]);
-					printf("%d]\n",t[i].connected[tmp]);
+					for(int j = 0; j < vle; j++)
+						printf("%d-%d\n",i,t[i].connected[j]);
 			}
 		}
 		printf("\n");
@@ -184,6 +183,8 @@ int main(int argc, char **argv)
 		counter++;
 
 	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
+
+	printf(" ilosc polanczen przed:\t %d,\n ilosc polonczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
 
 	//gdzie jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);

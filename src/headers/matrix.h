@@ -8,7 +8,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-double **create_A_matrix(FILE *in, int *nodes, node_t *t);
+double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1);
 double **create_D_matrix(double **matrix, int A_size, int *D_norm);
 double **subtract_matrix(double **matrix1, double **matrix2, int n);
 double **tri_matrix(double *a, double *b, int k);
@@ -24,7 +24,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
 //double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
 void assing_group(node_t t, double mediana, int n);
-void connections(node_t t, int n, double **A_matrix);
+void connections(node_t t, int n, double **A_matrix, int *connections2);
 void free_matrix(double **matrix, int n);
 
 #endif

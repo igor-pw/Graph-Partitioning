@@ -3,7 +3,7 @@
 #include <ctype.h>
 #define am 16386
 
-double **create_A_matrix(FILE *in, int *nodes, node_t *t)
+double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 {
 	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
 
@@ -79,19 +79,19 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t)
 	//alokujemy pamiec na size elementow i wypelniamy zerami
         for(int i = 0; i < size; i++)
                 matrix[i] = calloc(size, sizeof(double));
-
+	int countconnect = 0;
 	for(int i = 0; i < (counter2-1); i++)
 	{	
 		int y = index[index2[i]]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
 		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy
 								   // a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
-		{
+		{	countconnect++;
 			int x = index[j]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
 			matrix[y][x] = 1;
 			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
 		}	
 	}
-	
+	*connections1 = countconnect;
 	*nodes = size;
 	return matrix;
 }
@@ -358,7 +358,7 @@ void assing_group(node_t t, double mediana, int n){
 	
 }
 
-void connections(node_t t, int n, double **A_matrix){
+void connections(node_t t, int n, double **A_matrix, int *connections2){
 	int v[n];
 	int count = 0;
 	for(int i =0; i < n; i++){
@@ -372,6 +372,7 @@ void connections(node_t t, int n, double **A_matrix){
 		for(int j = 0; j<count; j++)
 			t[i].connected[j]=v[j];
 		t[i].vle=count;
+		*connections2 +=count;
 		count =0;
 	}
 }
