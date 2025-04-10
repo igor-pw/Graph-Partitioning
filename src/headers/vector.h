@@ -11,5 +11,6 @@ void divide_vec(double *vec, double coef, int n);
 void copy_vec(double *src_vec, double *dest_vec, int n);
 double find_smallest_eigenvalue(double *vec, int n);
 double *calculate_eigenvector(double eigenvalue, int n, double margin);
-double calculate_median(double *eigenvector, int groups, int n); 
+double calculate_median(double *eigenvector, int groups, int n);
+void eigen_centyl(double *centyle, int n, double *v, int k);
 int compare(const void *a, const void *b);

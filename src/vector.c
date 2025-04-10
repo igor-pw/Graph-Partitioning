@@ -109,7 +109,7 @@ double *calculate_eigenvector(double eigenvalue, int n, double margin)
 {
         double *eigenvector = malloc(sizeof(double) * n);
         int N = sqrt(n);
-
+	//G-cut 2000 coppyright
         double p, q;
         bool found = false;
 
@@ -169,6 +169,15 @@ double calculate_median(double *eigenvector, int groups, int n)
                 median = (eigenvector[n/groups] + eigenvector[n/groups+1])/2;
 
         return median;
+}
+
+void eigen_centyl(double *centyle, int n, double *v, int k){ //158
+	int div = (int)round(k/n);
+	for(int i =0; i<n; i++){
+		centyle[i] = v[i*div];
+		printf("podzial -> %lf\n",centyle[i]);
+	}
+	centyle[n]=v[k-1];
 }
 
 int compare(const void *a, const void *b)
