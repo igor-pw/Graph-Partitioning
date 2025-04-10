@@ -21,7 +21,7 @@ double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
 void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void force_zeros(double **matrix, int n, double margin);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
-//double **create_I_matrix(int n, double coef);
+double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
 void assing_group(node_t t, double mediana, int n);
 void connections(node_t t, int n, double **A_matrix, int *connections2);

@@ -94,8 +94,8 @@ double find_smallest_eigenvalue(double *vec, int n)
 	//wartosci wlasne sa uporzadkowane od najwiekszej wartosci do najmniejszej wzgledem wartosci bezwzglednej
 	//dlatego szukamy od konca najmniejszej wartosci dodatniej, ktora bedzie szukana wartoscia wlasna macierzy
 	
-	double eigenvalue = -1;
-	
+	double eigenvalue = -1;	
+
 	while(eigenvalue < 0)
 	{
 		eigenvalue = vec[n-1];
@@ -105,57 +105,49 @@ double find_smallest_eigenvalue(double *vec, int n)
 	return eigenvalue;
 }
 
-double *calculate_eigenvector(double eigenvalue, int n, double margin)
+double *calculate_eigenvector(double *vec, double **L_matrix, double** I_matrix, int n, double learning_rate)//, double momentum, double *prev_gradient)
 {
-        double *eigenvector = malloc(sizeof(double) * n);
-        int N = sqrt(n);
+	//nowa wersja w trakcie
+	double **sub_matrix = subtract_matrix(L_matrix, I_matrix, n);
+	double *r_vec = multiply_mtx_by_vec(sub_matrix, vec, n);
+	double *gradient = multiply_mtx_by_vec(sub_matrix, r_vec, n);
 
-        double p, q;
-        bool found = false;
+	for(int i = 0; i < n; i++)
+		gradient[i] *= 2;
 
-        //prawdopodobnie trzeba ulepszyc proces szukania p i q, albo porownywac wyniki roznych p i q
+	copy_vec(vec, r_vec, n);
 
-        for(int i = 1; i < N; i++)
-        {
-                for(int j = 1; j < N; j++)
-                {
-                        if(fabs(eigenvalue-4+2*cos((i*M_PI)/(n+1))+2*cos((j*M_PI)/(n+1))) < margin)
-                        {
-                                p = i;
-                                q = j;
-                                //printf("p: %g, q: %g\n", p, q);
+	double vec_norm = 0;
+	for(int i = 0; i < n; i++)
+	{
+		vec[i] -= learning_rate*gradient[i]; //- momentum*prev_gradient[i];
+		vec_norm += pow(vec[i], 2);
+	}
+		
+	//copy_vec(gradient, prev_gradient, n);
 
-                                found = true;
-                                break;
-                        }
-                }
+	vec_norm = sqrt(vec_norm);
 
-                if(found)
-                        break;
-        }
+	divide_vec(vec, vec_norm, n);
 
-        if(!found)
-        {
-                printf("Nie znaleziono odpowiednich wartosci\n");
-                return NULL;
-        }
+	double epsilon = 0;
 
-        int index;
+	for(int i = 0; i < n; i++)
+		epsilon += (pow(vec[i]-r_vec[i], 2));
 
-        for(int i = 1; i <= N+2; i++)
-        {
-                for(int j = 1; j <= N+2; j++)
-                {
-                        index = j + (i-1)*N-1;
+	//printf("epsilon: %g\n", sqrt(fabs(epsilon)));
 
-                        if(index < n)
-                                eigenvector[index] = sin((p*M_PI*i)/(N+1))*sin((q*M_PI*j)/(N+1));
-                }
-        }
+	free_matrix(sub_matrix, n);
+	free(r_vec);
+	free(gradient);
+	
+	//learning_rate *= decay;
 
-        //printf("index: %d\n", index);
+	if(sqrt(fabs(epsilon)) > pow(10, -6))	
+		vec = calculate_eigenvector(vec, L_matrix, I_matrix, n, learning_rate);//, momentum, prev_gradient);
+	
+	return vec;
 
-        return eigenvector;
 }
 
 double calculate_median(double *eigenvector, int groups, int n)

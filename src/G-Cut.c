@@ -1,10 +1,12 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
 #include "headers/input.h"
+#include <time.h>
 #define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 int main(int argc, char **argv)
 {
+	//srand(time(NULL));
 	Flags flags = Error;
 	int argv_index = 1;
 	char *flag_value = NULL;
@@ -51,8 +53,7 @@ int main(int argc, char **argv)
 		return 2;
 	}
 
-	node_t t = NULL;// = malloc(n * sizeof(struct node));
-	
+	node_t t = NULL;// = malloc(n * sizeof(struct node));	
 
 	//macierz sasiedztwa
 	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
 	calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
 	printf("Wspolczynniki alfa i beta\n");
 
-	free(initial_vec);
+	//free(initial_vec);
 	free(prev_initial_vec);
 
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
@@ -130,8 +131,18 @@ int main(int argc, char **argv)
 
 	free(eigenvalues_vec);
 
+	double **I_matrix = create_I_matrix(nodes, eigenvalue);
+
+	for(int i = 0; i < nodes; i++)
+		initial_vec[i] = L_matrix[i][i]/sqrt(D_norm); 
+
+	double learning_rate = 0.001;
+	double momentum = 0.0;
+
+	double *prev_gradient = calloc(n, sizeof(double));
+
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
-	double *eigenvector = calculate_eigenvector(eigenvalue, nodes, 0.075);
+	double *eigenvector = calculate_eigenvector(initial_vec, L_matrix, I_matrix, nodes, learning_rate);//, momentum, prev_gradient);
 	printf("Wektor wlasny\n");
 	
 	assing_eigen(t,eigenvector,nodes);
@@ -147,6 +158,9 @@ int main(int argc, char **argv)
 	}
 	*/
 
+	//double *sorted_eigenvector = malloc(sizeof(double) * nodes);
+	//copy_vec(eigenvector, sorted_eigenvector, nodes);
+
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
@@ -156,6 +170,7 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
+
 	assing_group(t,median,nodes);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
 	connections(t,nodes, Macierz_s, &connections2);
@@ -212,7 +227,7 @@ int main(int argc, char **argv)
 
 	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
 
-	printf(" ilosc polanczen przed:\t %d,\n ilosc polonczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
+	printf(" ilosc polanczen przed:\t %d,\n ilosc polaczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);
