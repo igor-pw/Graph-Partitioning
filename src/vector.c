@@ -113,7 +113,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;
-
+	
 	double *new_velocity = malloc(sizeof(double) * n);	
 
 	copy_vec(vec, r_vec, n);
@@ -161,6 +161,15 @@ double calculate_median(double *eigenvector, int groups, int n)
                 median = (eigenvector[n/groups] + eigenvector[n/groups+1])/2;
 
         return median;
+}
+
+void eigen_centyl(double *centyle, int n, double *v, int k){ //158
+	int div = (int)round(k/n);
+	for(int i =0; i<n; i++){
+		centyle[i] = v[i*div];
+		printf("podzial -> %lf\n",centyle[i]);
+	}
+	centyle[n]=v[k-1];
 }
 
 int compare(const void *a, const void *b)

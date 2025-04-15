@@ -343,16 +343,15 @@ void assing_eigen(node_t t, double *eigenvector, int n){
 			t[i].eigenvalue=eigenvector[i];
 }
 
-void assing_group(node_t t, double mediana, int n){
-	
-		for(int i =0; i<n; i++){
-				if(t[i].eigenvalue < mediana){
-					t[i].group =1;
-				}
+//	|	x	|	y	|	z	|
 
-				else{
-					t[i].group=2;
-				}
+void assing_group(node_t t, int n, int ngr, double *centyle){
+	int centlen = ngr+1;
+	for(int i =0; i<n; i++){
+			for(int j = 1; j < centlen; j++){
+				if(t[i].eigenvalue >= centyle[j-1] && t[i].eigenvalue < centyle[j])
+					t[i].group = j;
+			}
 	}
 	
 }

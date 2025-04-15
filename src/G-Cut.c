@@ -166,14 +166,21 @@ int main(int argc, char **argv)
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
+	int ngroups = 2; // divide; //<------ ILOSC GRUP (tymczasowo)
+	
+	int centlen = ngroups+1;
+	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
+	double *centyle = malloc(centlen * sizeof(double));
+	eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
+
 	printf("Wartosc wlasna: %g\n", eigenvalue);
 	print_vec(eigenvector, nodes);
 	
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-
-	assing_group(t,median,nodes);
+	
+	assing_group(t,nodes,ngroups,centyle);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
 	connections(t,nodes, Macierz_s, &connections2);
 	int lu = 0;
@@ -188,7 +195,6 @@ int main(int argc, char **argv)
 		}
 		printf("\n");
 	}
-	int ngroups = 2;
 
 		printf("\n");
 	for(int k = 1; k <=ngroups; k++){
