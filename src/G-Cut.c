@@ -133,16 +133,18 @@ int main(int argc, char **argv)
 
 	double **I_matrix = create_I_matrix(nodes, eigenvalue);
 
-	for(int i = 0; i < nodes; i++)
-		initial_vec[i] = L_matrix[i][i]/sqrt(D_norm); 
+	//for(int i = 0; i < nodes; i++)
+		//initial_vec[i] = L_matrix[i][i]/sqrt(D_norm); 
+
+	double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
 
 	double learning_rate = 0.001;
-	double momentum = 0.0;
+	double momentum = 0.8;
 
-	double *prev_gradient = calloc(n, sizeof(double));
+	double *velocity = calloc(n, sizeof(double));
 
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
-	double *eigenvector = calculate_eigenvector(initial_vec, L_matrix, I_matrix, nodes, learning_rate);//, momentum, prev_gradient);
+	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity);
 	printf("Wektor wlasny\n");
 	
 	assing_eigen(t,eigenvector,nodes);

@@ -10,6 +10,6 @@ void subtract_vec(double *vec, double *coef_vec, double coef, int n);
 void divide_vec(double *vec, double coef, int n);
 void copy_vec(double *src_vec, double *dest_vec, int n);
 double find_smallest_eigenvalue(double *vec, int n);
-double *calculate_eigenvector(double *vec, double **L_matrix, double **I_matrix, int n, double learning_rate);//, double momentum, double *prev_gradient);
+double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity);
 double calculate_median(double *eigenvector, int groups, int n); 
 int compare(const void *a, const void *b);

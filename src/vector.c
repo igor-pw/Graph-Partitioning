@@ -105,26 +105,28 @@ double find_smallest_eigenvalue(double *vec, int n)
 	return eigenvalue;
 }
 
-double *calculate_eigenvector(double *vec, double **L_matrix, double** I_matrix, int n, double learning_rate)//, double momentum, double *prev_gradient)
+double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity)
 {
 	//nowa wersja w trakcie
-	double **sub_matrix = subtract_matrix(L_matrix, I_matrix, n);
-	double *r_vec = multiply_mtx_by_vec(sub_matrix, vec, n);
-	double *gradient = multiply_mtx_by_vec(sub_matrix, r_vec, n);
+	double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
+	double *gradient = multiply_mtx_by_vec(gradient_matrix, r_vec, n);
 
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;
+
+	double *new_velocity = malloc(sizeof(double) * n);	
 
 	copy_vec(vec, r_vec, n);
 
 	double vec_norm = 0;
 	for(int i = 0; i < n; i++)
 	{
-		vec[i] -= learning_rate*gradient[i]; //- momentum*prev_gradient[i];
+		new_velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i]; 
+		vec[i] -= learning_rate*new_velocity[i];
 		vec_norm += pow(vec[i], 2);
 	}
 		
-	//copy_vec(gradient, prev_gradient, n);
+	//copy_vec(new_velocity, velocity, n);
 
 	vec_norm = sqrt(vec_norm);
 
@@ -137,14 +139,12 @@ double *calculate_eigenvector(double *vec, double **L_matrix, double** I_matrix,
 
 	//printf("epsilon: %g\n", sqrt(fabs(epsilon)));
 
-	free_matrix(sub_matrix, n);
 	free(r_vec);
 	free(gradient);
+	free(velocity);
 	
-	//learning_rate *= decay;
-
 	if(sqrt(fabs(epsilon)) > pow(10, -6))	
-		vec = calculate_eigenvector(vec, L_matrix, I_matrix, n, learning_rate);//, momentum, prev_gradient);
+		vec = calculate_eigenvector(vec, gradient_matrix, n, learning_rate, momentum, new_velocity);
 	
 	return vec;
 
