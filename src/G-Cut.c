@@ -141,27 +141,29 @@ int main(int argc, char **argv)
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
+	if(nodes >= 200)
+		learning_rate = 0.01;
+
+	double epsilon_margin;
+
+	if(nodes <= 200)
+		epsilon_margin = pow(10, -12);
+	else if(nodes > 200 && nodes <= 500)
+		epsilon_margin = pow(10, -8);
+	else if(nodes > 500 && nodes <= 1000)
+		epsilon_margin = pow(10, -6);
+	else if(nodes > 1000 && nodes <= 10000)
+		epsilon_margin = pow(10, -4);
+	else
+		epsilon_margin = pow(10, -3);
+
 	double *velocity = calloc(n, sizeof(double));
 
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
-	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity);
+	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
 	printf("Wektor wlasny\n");
 	
 	assing_eigen(t,eigenvector,nodes);
-	/*
-	for(int i = 0; i <n;i++){
-		for(int j =0; j <n ;j++){
-			if(t[i][j].in ==1)
-				printf("%3lf ",t[i][j].eigenvalue);
-			else
-				printf("0    ");
-		}
-		printf("\n");
-	}
-	*/
-
-	//double *sorted_eigenvector = malloc(sizeof(double) * nodes);
-	//copy_vec(eigenvector, sorted_eigenvector, nodes);
 
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
@@ -209,24 +211,6 @@ int main(int argc, char **argv)
 		printf("\n");
 
 	}
-
-/*	
-	lu = 0;
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < n; j++){
-			if(t[lu].y == i && t[lu].x ==j){
-				printf("%d ",t[lu].group);
-				lu++;
-			}
-			else
-				printf("0 ");
-		}
-		printf("\n");
-	}
-
-*/
-
-	
 
 	int counter = 0;
 
