@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	Flags flags = Error;
 	int argv_index = 1;
 	char *flag_value = NULL;
-	int divide = 2;
+	int divide = 17;
 	double margin = 0.1;
 	char *input_name = NULL;
 	char *output_name = "output.txt";
@@ -62,7 +62,12 @@ int main(int argc, char **argv)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
 	copy_matrix(A_matrix, Macierz_s, nodes);
 	printf("Macierz Sasiedztwa\n");
-	
+	divide = 17; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,to tylko tymczasowe
+	//rozmiar grup i ich odchylenie
+	double gr_size = nodes/divide;
+	double odchylenie = gr_size * margin;
+
+
 	fclose(in);
 
 	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
@@ -166,11 +171,12 @@ int main(int argc, char **argv)
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
-	int ngroups = 2; // divide; //<------ ILOSC GRUP (tymczasowo)
+	int ngroups = divide; // divide; //<------ ILOSC GRUP (tymczasowo)
 	
 	int centlen = ngroups+1;
 	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
 	double *centyle = malloc(centlen * sizeof(double));
+	printf("Podzial na n czesci\n");
 	eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
@@ -180,14 +186,36 @@ int main(int argc, char **argv)
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
 	
+	printf("przydzielanie grup\n");
 	assing_group(t,nodes,ngroups,centyle);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
+			    //
+	
+	printf("laczenie odizolowanych wieszcholkow\n");
+	izolated(Macierz_s, eigenvector, t, nodes, ngroups, centyle);
+
+	int* gr_count = (int*)malloc(ngroups * sizeof(int)); // ilosc wieszcholkow w grupach
+
+
+	printf("korekcja marinesu\n");
+	margin_correction(t,Macierz_s,nodes,ngroups,margin,gr_count,gr_size,odchylenie);
+
+	
+
+//	printf("korekcja marginesu\n");
+//	margin_correction(Macierz_s, eigenvector, t, nodes, ngroups, centyle);
+	printf("szukanie odizolowanych wieszcholkow\n");
+//	izolated(Macierz_s, eigenvector, t, nodes, ngroups, centyle);
+//
+
+	printf("usuwnie polaczen\n");
 	connections(t,nodes, Macierz_s, &connections2);
+
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(t[lu].y == i && t[lu].x ==j){
-				printf("1 ");
+				printf("%d ", t[lu].group);
 				lu++;
 			}
 			else
@@ -207,7 +235,6 @@ int main(int argc, char **argv)
 			}
 		}
 		printf("\n");
-
 	}
 
 /*	
@@ -227,19 +254,34 @@ int main(int argc, char **argv)
 */
 
 	
+	
+	int counter[ngroups];
+	
+	printf("ilosc wieszcholkow: %d \n", nodes);
+	
+	for(int i =0; i<ngroups ;i++){
+		counter[i] = 0;
+		for(int j =0; j<nodes; j++){
+			if(t[j].group == i + 1){
+				counter[i]++;
+			}
+			else if(t[j].group == 0){
+				printf("\n\n\n !!!!   %d   !!!!\n",j);
+			}
+		}
+		printf("ilosc wieszcholkow w %d grupie: %d \n",i + 1,counter[i]);
+	}
 
-	int counter = 0;
 
-	while(eigenvector[counter] < median)
-		counter++;
-
-	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
 
 	printf(" ilosc polanczen przed:\t %d,\n ilosc polaczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
+	for(int i =0; i < ngroups; i++){
+		printf("ilosc wieszcholkow w %d grupie: %d \n",i,gr_count[i]);
+	}
 
 	return 0;
 }

@@ -375,6 +375,230 @@ void connections(node_t t, int n, double **A_matrix, int *connections2){
 	}
 }
 
+void izolated(double **A_matrix, double *eigenvector, node_t t, int nodes, int ngroups, double *centyle){
+	int fix = 1;
+	while(fix){
+		for(int i = 0; i < nodes; i++){
+			int brak_pol = 1;
+			int gr = t[i].group;
+
+			for(int j =0; j < nodes; j++){
+				int dgr = t[j].group;
+				if(gr == dgr && A_matrix[i][j] ==1){
+					brak_pol = 0;
+					break;
+				}
+
+			}
+			if(brak_pol == 1){
+				double naj_roz = 2;
+				int prz_do = 0;
+				double nod = t[i].eigenvalue;
+				for(int j =0; j< nodes; j++){
+					double snod = t[j].eigenvalue;
+					if(A_matrix[i][j] == 1){
+						double tmp = fabs(snod - nod);
+						if( naj_roz > tmp){
+							naj_roz = tmp;
+							prz_do = j;
+						}
+					}
+				}
+
+				t[i].group = t[prz_do].group;
+
+			}
+
+		}
+
+	fix=0;
+	}
+}
+/*
+void margin_correction(double **A_matrix, double *eigenvector, node_t t, int nodes, int ngroups, double *centyle){
+	double m = 0.50; // margines
+	int margin_status = 1;
+	while(margin_status){
+		int *g_size = (int *)calloc(ngroups, sizeof(int)); // nie chcialo mi sie robic pentli do zerowania
+		for(int i =0; i<nodes; i++){
+			int gr = t[i].group;
+			g_size[gr]++;
+		}
+		double avg_size = nodes/ngroups;
+		double odchylenie = avg_size * m;
+
+		int larg_gr = -1;
+		int smal_gr =-1;
+
+		for(int i = 0; i<ngroups; i++){
+			if( g_size[i] > avg_size + odchylenie){
+				larg_gr = i + 1;
+			}
+			else if( g_size[i] < avg_size - odchylenie){
+				smal_gr = i + 1;
+			}
+		}
+		if(larg_gr == -1 && smal_gr == -1){
+			margin_status = 0;
+			free(g_size);
+			printf("jup1111111!\n");
+			continue;
+		}
+		//-------------
+		if((larg_gr == -1 && smal_gr != -1 ) || (larg_gr != -1 && smal_gr == -1)){
+			margin_status = 0;
+			free(g_size);
+			printf("jupi22222222!\n");
+			continue;
+		}
+		//------------------
+
+		if(larg_gr != -1 && smal_gr != -1){
+			printf("jupi333333333!\n");
+		
+			int best_node = -1;
+			double best_connect = -1;
+
+			for(int i =0; i < nodes; i++){
+				if(t[i].group != larg_gr){
+					continue;
+				}
+				int max_count_conn = 0;
+				int min_count_conn = 0;
+				
+				for(int j =0; j<nodes; j++){
+					if(A_matrix[i][j] == 1){
+						if(t[j].group == larg_gr){
+							max_count_conn ++;
+						}
+						if(t[j].group == smal_gr){
+							min_count_conn ++;
+						}
+					}
+				}
+				double con_ratio = (double)min_count_conn/max_count_conn;
+
+				if(con_ratio > best_connect){
+					best_connect = con_ratio;
+					best_node = i;
+				}
+
+
+
+
+			}
+
+			if(best_connect != -1){
+				t[best_node].group = smal_gr;
+			}
+
+		}
+
+
+	}
+}
+*/
+
+void count_nodes(node_t t, int nodes, int *gr_count, int ngroups){ //zliczanie wieszholkow w grupach
+	for(int i =0; i <ngroups; i++){ // zerujemy tablice
+		gr_count[i] = 0;
+	}
+
+	for(int i =0; i < nodes; i++){
+		int gr = t[i].group-1; //ilczenie grup zaczynamy od 1;
+		gr_count[gr]++;
+	}
+}
+
+//ubolewam nad dluga nazwa ale chce juz to zapisac doklanie XDDD
+int node_same_group_edg_neighbour(node_t t, double **A_matrix, int node_num, int nodes){
+	int gr = t[node_num].group; // grupa sprawdzanego wieszcholka
+	int count = 0; //ilosc polaczen do tej samej grupy
+	for(int i = 0; i < nodes; i++){
+		if(A_matrix[node_num][i] ==1 && t[i].group == gr){ //sprawdzamy czy wieszchlek ma polonczene i czy ma ta sama grupe 
+			count++;
+		}
+	}
+	return count;
+}
+
+//liczymy ilosc polonczen wieszcholka do innych z inna grupa
+int nodes_diferent_group_edg_neighbour(node_t t, double **A_matrix, int node_num, int nodes, int gr_to){
+				printf("p\n");		
+	int count = 0; //ilosc polaczen do grupy gr_to
+				printf("om\n");		
+	for(int i = 0; i < nodes; i++){
+				printf("pom\n");		
+		if(A_matrix[node_num][i] ==1 && gr_to == t[i].group){ //sprawdzamy czy wieszchlek ma polonczene i czy ma z grupa gr_to
+				printf("\n");		
+			count++;
+				printf("purin\n");		
+		}
+				printf("to\n");		
+	}
+				printf("...\n");		
+	return count;
+}
+
+/// !!!!!!!!!!!!! Moze cos zle robie ale ten algorytm tworzy to o czym mowilismy ze powstaje sporo rozdzielonych wieszcholkow albo takich ze w grupie powstaja grupy bez polaczen, nwm czy np jak by wwalic tutaj dfs-a to by mocno pomoglo ale myslac o tym ze nadal moze cos nie wypalic to juz nwm czy nie lepiej poswiencic ten czas na kaminsa. W tym co teraz napisalem brakuje jeszcze dla mniejszych od mraginesu i  potem w wyszukiwaniu nie patrzec tylko na niezgodne z marginesem ale nie wydaje mi sie ze by to pomoglo z tym o czym mowilem !!!!!!!!!!
+/// !!!!!!!!!!!!! 
+void margin_correction(node_t t, double **A_matrix, int nodes, int ngroups, int margin, int *gr_count, double gr_size, double odchylenie){
+	count_nodes(t, nodes, gr_count, ngroups);
+	int iter_count = 0; // ilosc juz wykonanych iteracji
+	int changes_made = 1; // czy cos tam sie udalo
+	int max_iter = nodes*2*10; // max iteracji
+	
+	while(changes_made == 1 && iter_count < max_iter){
+
+		changes_made = 0; // jezeli cos zmienimy to ustawimy to na 1 co nam mowi ze cos sie dzieje i a jak nie to jest na 0 zeby pentla nie wykonywala sie w niskonczonosc
+		iter_count ++;
+		
+		for(int i =0; i <nodes; i++){ // przechodzimy przez wszystkie wieszcholki w grafie
+			int cur_gr = t[i].group; // zapisujemy grupe wieszcholka nad ktorym pracujemy
+			printf("%d > %lf + %lf = %lf\n",gr_count[cur_gr],gr_size, odchylenie, gr_size + odchylenie);
+			if(gr_count[cur_gr] > gr_size + odchylenie){ // czy gr jest wieksza niz moze
+
+							printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+				int mov_gr_to = -1; // gr do ktorej przeniesmy wieszcholek -1 bo inicjaliza
+				int max_ex_eg = -1; // najwiecej krawendzi ktore mozna usunac
+				printf("1\n");		
+				for(int j =0; j < ngroups; j++){	// siup bo grupach
+				printf("2\n");		
+					int tic = j + 1;
+					if( tic == cur_gr){ // nie chcemy grupy w ktorej jestesmy w naszym skladzie
+				printf("3\n");		
+				  	//j+1 bo tam od 1 zaczynamy 
+						continue; //ok
+					}
+				printf("4\n");		
+					if(gr_count[j] < gr_size - odchylenie){ // jezli jest cos za male to chcemy
+				printf("5\n");		
+						int df_gr_ed = nodes_diferent_group_edg_neighbour(t,A_matrix,i,nodes,tic); //liczymy ile ma sonsiadow z tej grupy
+				printf("6\n");		
+							printf("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP\n");
+						if(df_gr_ed >max_ex_eg){ // sprawdzamy czy ilosc wieszcholkow tego sonsiada jest wieksza od dotychczasowego najwiekszego wyniku
+							max_ex_eg = df_gr_ed;
+							mov_gr_to = tic; // zapisujemy do jekiej gr przeniesc;
+							printf("jejjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj\n");
+
+						}
+					}
+
+				}
+				if(mov_gr_to != -1){
+					t[i].group = mov_gr_to;
+					gr_count[mov_gr_to -1] ++;
+					gr_count[cur_gr -1] --;
+					changes_made = 1;
+				}
+
+			
+			}
+
+		}
+	}
+}
+
 void free_matrix(double **matrix, int n)
 {
 	for(int i = 0; i < n; i++)

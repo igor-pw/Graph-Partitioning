@@ -25,6 +25,12 @@ double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
 void assing_group(node_t t, int n, int ngr, double *centle);
 void connections(node_t t, int n, double **A_matrix, int *connections2);
+void izolated(double **A_matrix, double *eigenvector, node_t t, int nodes, int ngroups, double *centyle);
+//void margin_correction(double **A_matrix, double *eigenvector, node_t t, int nodes, int ngroups, double *centyle);
+void count_nodes(node_t t, int nodes, int *gr_count, int ngroups);
+int node_same_group_edg_neighbour(node_t t, double **A_matrix, int node_num, int nodes);
+int nodes_diferent_group_edg_neighbour(node_t t, double **A_matrix, int node_num, int nodes, int gr_to);
+void margin_correction(node_t t, double **A_matrix, int nodes, int ngroups, int margin, int *gr_count, double gr_size, double odchylenie);
 void free_matrix(double **matrix, int n);
 
 #endif
