@@ -4,7 +4,7 @@
 
 typedef struct node{
 	int *connected;
-	int nr, x, y, group, index, vle;
+	int nr, x, y, group, index, vle, gain, gr_gain;
 	double eigenvalue;
 } * node_t;
 /*

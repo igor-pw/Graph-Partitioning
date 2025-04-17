@@ -25,6 +25,8 @@ double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
 void assing_group(node_t t, int n, int ngr, double *centle);
 void connections(node_t t, int n, double **A_matrix, int *connections2);
+void gain_calculate(node_t t, double  **Macierz_s, int ngroups, int nodes);
+void print_gain(node_t t, int nodes);
 void free_matrix(double **matrix, int n);
 
 #endif

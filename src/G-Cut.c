@@ -130,20 +130,25 @@ int main(int argc, char **argv)
 	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
 
 	free(eigenvalues_vec);
-
+	printf("1\n");
 	double **I_matrix = create_I_matrix(nodes, eigenvalue);
 
+	printf("2\n");
 	//for(int i = 0; i < nodes; i++)
 		//initial_vec[i] = L_matrix[i][i]/sqrt(D_norm); 
 
+	printf("3\n");
 	double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
 
+	printf("4\n");
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
+	printf("5\n");
 	if(nodes >= 200)
 		learning_rate = 0.01;
 
+	printf("6\n");
 	double epsilon_margin;
 
 	if(nodes <= 200)
@@ -157,8 +162,10 @@ int main(int argc, char **argv)
 	else
 		epsilon_margin = pow(10, -3);
 
+	printf("7\n");
 	double *velocity = calloc(n, sizeof(double));
 
+	printf("8\n");
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
 	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
 	printf("Wektor wlasny\n");
@@ -168,11 +175,12 @@ int main(int argc, char **argv)
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
-	int ngroups = 2; // divide; //<------ ILOSC GRUP (tymczasowo)
+	int ngroups = 17; // divide; //<------ ILOSC GRUP (tymczasowo)
 	
 	int centlen = ngroups+1;
 	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
 	double *centyle = malloc(centlen * sizeof(double));
+	printf("centyle: \n");
 	eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
@@ -199,7 +207,7 @@ int main(int argc, char **argv)
 	}
 
 		printf("\n");
-	for(int k = 1; k <=ngroups; k++){
+	for(int k = 0; k <ngroups; k++){
 		printf("grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
 			int vle = t[i].vle;
@@ -216,10 +224,22 @@ int main(int argc, char **argv)
 
 	while(eigenvector[counter] < median)
 		counter++;
+	printf("ilosc wszystkich wieszcholkow: %d\n", nodes);
+	for(int i = 0; i < ngroups; i ++){
+		int countgr = 0;
+		for(int j = 0; j < nodes; j ++){
+			if(t[j].group == i){
+				countgr++;
+			}
+		}
+		printf("ilosc wieszoclkow w gr %d: %d\n", i , countgr);
+	}
 
-	printf("ilosc wierzcholkow w 1 grupie: %d\nilosc wierzcholkow w 2 grupie: %d\n", counter, nodes-counter);
 
 	printf(" ilosc polanczen przed:\t %d,\n ilosc polaczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
+
+	gain_calculate(t, Macierz_s, ngroups, nodes);
+	print_gain(t, nodes);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);

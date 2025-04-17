@@ -346,11 +346,10 @@ void assing_eigen(node_t t, double *eigenvector, int n){
 //	|	x	|	y	|	z	|
 
 void assing_group(node_t t, int n, int ngr, double *centyle){
-	int centlen = ngr+1;
 	for(int i =0; i<n; i++){
-			for(int j = 1; j < centlen; j++){
+			for(int j = 1; j <= ngr + 1; j++){
 				if(t[i].eigenvalue >= centyle[j-1] && t[i].eigenvalue < centyle[j])
-					t[i].group = j;
+					t[i].group = j -1;
 			}
 	}
 	
@@ -372,6 +371,45 @@ void connections(node_t t, int n, double **A_matrix, int *connections2){
 		t[i].vle=count;
 		*connections2 +=count;
 		count =0;
+	}
+}
+
+void gain_calculate(node_t t, double **Macierz_s, int ngroups, int nodes){
+	int dif[ngroups];
+	for(int i =0; i < nodes; i++){
+		int cur_node_gr = t[i].group;
+		for(int j = 0; j < ngroups; j++){
+			dif[j] = 0;
+		}
+		for(int j = 0; j < nodes; j++){
+			if(Macierz_s[i][j] == 1) dif[t[j].group]++;	
+		}
+		int min = INFINITY;
+		int gr = -1;
+		for(int j = 0; j < ngroups; j++){
+			if( dif[j] != 0 ){
+				int tmp = dif[cur_node_gr] - dif[j];
+				if(tmp < min){
+					min = tmp;
+					gr = j;
+				}
+			}
+		}
+		if(gr == cur_node_gr){ // jesli mamy polonczenie tylko z gupa do ktorej nalezymy to gain = ilosci przejsc do tej grupy 
+			t[i].gr_gain = gr;
+			t[i].gain = dif[gr];
+		}
+		else{
+			t[i].gr_gain = gr;
+			t[i].gain = min;
+		}
+		
+	}
+}
+
+void print_gain(node_t t, int nodes){
+	for(int i =0; i < nodes; i++){
+		printf("wieszcholek %d z grupy %d -> gain group %d gain %d\n",i,t[i].group,t[i].gr_gain,t[i].gain);
 	}
 }
 
