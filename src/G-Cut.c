@@ -53,8 +53,11 @@ int main(int argc, char **argv)
 	if(n == 0){
 		return 2;
 	}
-
-	node_t t = NULL;// = malloc(n * sizeof(struct node));	
+	divide = 17;
+	node_t t = NULL;// = malloc(n * sizeof(struct node));
+	grupa_g g = malloc(divide * sizeof(struct grupa));
+	
+	
 
 	//macierz sasiedztwa
 	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
@@ -66,13 +69,22 @@ int main(int argc, char **argv)
 	
 	fclose(in);
 
+	for(int i = 0; i < divide; i++){
+		g[i].gr_nodes = malloc(nodes * sizeof(double)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
+	}	
+
 	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
 	double **D_matrix = create_D_matrix(A_matrix, nodes, &D_norm);
 	printf("Macierz Diagonalna\n");
 	
 	//macierz Laplace'a
 	double **L_matrix = subtract_matrix(D_matrix, A_matrix, nodes);
-	printf("Macierz Laplace'a\n");	
+	printf("Macierz Laplace'a\n");
+	double **Macierz_L = malloc(sizeof(double*)*nodes);
+	for(int i =0; i < nodes; i++)
+		Macierz_L[i]=malloc(sizeof(double)*nodes);
+	copy_matrix(L_matrix, Macierz_L, nodes);
+	
 
 	free_matrix(A_matrix, nodes);
 
@@ -176,7 +188,7 @@ int main(int argc, char **argv)
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
-	int ngroups = 17; // divide; //<------ ILOSC GRUP (tymczasowo)
+	int ngroups = divide;//////      56 linijka	 // divide; //<------ ILOSC GRUP (tymczasowo)
 	
 	int centlen = ngroups+1;
 	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
@@ -190,7 +202,7 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen);
+	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen, g, Macierz_L);
 	//assing_group(t,nodes,ngroups,centyle);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
 //	connections(t,nodes, Macierz_s, &connections2);

@@ -208,13 +208,17 @@ double calculate_median(double *eigenvector, int groups, int n)
         return median;
 }
 
-double *eigen_centyl(double *eigenvector, int n, int k, double *root_val){ //158
+void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g ,double **Macierz_L){ //158
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
+	
+	for(int i = 0; i< k; i++)
+		t[i].group = -1;
+
 	for(int i =1; i<n; i++){
 		int ind_k = (int)round(i*div);
 		int ind_p = (int)round((i-1)*div);
-		tmp = ind_p;
+		tmp = ind_k;
 		int size = ind_k-ind_p+1;
 		double *eigen_tmp = malloc(size * sizeof(double));
 		int count = 0;
@@ -222,14 +226,36 @@ double *eigen_centyl(double *eigenvector, int n, int k, double *root_val){ //158
 			eigen_tmp[count] = eigenvector[j];
 			count++;
 		}
-		if(size % 2 == 1)
-                root_val[i-1] = eigen_tmp[size/2+1];
 
-        	else if(size % 2 == 0)
-                root_val[i-1] = eigen_tmp[size/2];
+		int max_len = -1;
+		int node = -1;
 
-		printf("centyl %d -> %lf\n", i-1, root_val[i-1]);
+		int *node_gr = malloc(size * sizeof(int));
+		for(int j = 0; j < size; j++){
+			for(int l =0; l < k; l++){
+				if(eigen_tmp[j] == t[l].eigenvalue){
+					node_gr[j] = l;
+					break;
+				}
+
+			}
+		}
+
+		for(int j = 0; j< size; j++){
+			int nr = node_gr[j];
+			if(Macierz_L[nr][nr] > max_len){
+				max_len = Macierz_L[nr][nr];
+				node = nr;
+			}
+		}
+
+		g[i-1].gr_nodes[0] = node;
+		g[i-1].gr_size =1;
+		t[node].group = i-1;
+		
+		printf("Najwiecej polonczen w gr %d ma wieszcholek %d -> %d\n", i-1, g[i-1].gr_nodes[0], max_len);
 		free(eigen_tmp);
+		free(node_gr);
 		}
 	int size = k - tmp;
 	double *eigen_tmp = malloc(size * sizeof(double));
@@ -238,9 +264,34 @@ double *eigen_centyl(double *eigenvector, int n, int k, double *root_val){ //158
 		eigen_tmp[count] = eigenvector[j];
 		count++;
 		}
-	root_val[n-1] = calculate_median(eigen_tmp, 2, size);
+	int max_len = -1;
+	int node = -1;
+
+	int *node_gr = malloc(size * sizeof(int));
+	for(int j = 0; j < size; j++){
+		for(int l =0; l < k; l++){
+			if(eigen_tmp[j] == t[l].eigenvalue){
+				node_gr[j] = l;
+				break;
+			}
+		}
+	}
+
+	for(int j = 0; j< size; j++){
+		int nr = node_gr[j];
+		if(Macierz_L[nr][nr] > max_len){
+			max_len = Macierz_L[nr][nr];
+			node = nr;
+		}
+	}
+
+	g[n-1].gr_nodes[0] = node;
+	g[n-1].gr_size =1;
+	t[node].group = n-1;
+
+	
 	free(eigen_tmp);
-	return root_val;
+	free(node_gr);
 }
 
 int compare(const void *a, const void *b)

@@ -1,4 +1,8 @@
+#ifndef _VECTOR_C_
+#define _VECTOR_C_
+
 #include "matrix.h"
+#include "graph.h"
 
 double vec_norm(double *vec, int n);
 double *vec_sub(double *a, double *b, int k);
@@ -11,6 +15,8 @@ void divide_vec(double *vec, double coef, int n);
 void copy_vec(double *src_vec, double *dest_vec, int n);
 double find_smallest_eigenvalue(double *vec, int n);
 double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin);
-double calculate_median(double *eigenvector, int groups, int n); 
-double *eigen_centyl(double *eigenvecotr, int n, int k, double *root_val);
+double calculate_median(double *eigenvector, int groups, int n);
+void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g ,double **Macierz_L);
 int compare(const void *a, const void *b);
+
+#endif
