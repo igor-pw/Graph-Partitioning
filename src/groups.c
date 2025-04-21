@@ -39,9 +39,11 @@ int con_am(node_t t, double **Macierz_s, int nodes, int node){
 void find_least_con(node_t t, double **Macierz_s, int nodes, int node, int *best_node, int * low_con){
 	int cur_gr = t[node].group;
 	for(int i = 0; i < nodes; i++){
+		//printf("gr = %d, Macierz = %d, czy ma gr = %d, badany node = %d\n",cur_gr, Macierz_s[node][i], t[i].group, node);
 		if(Macierz_s[node][i] != 0 && t[i].group == -1){
 			int tmp = con_am(t, Macierz_s, nodes, i);
 			if(tmp < (*low_con)){
+				//printf("tmp = %d, i = %d, node = %d\n",tmp,i,node);
 				(*low_con) = tmp;
 				(*best_node) = i;
 			}
@@ -56,9 +58,10 @@ void find_smallest_con(node_t t, grupa_g g, double **Macierz_s, int nodes, int n
 			int best_node = INT_MAX;
 			int low_con = INT_MAX;
 			for(int k = 0; k < g[j].gr_size; k++){
-				find_least_con(t, Macierz_s, nodes, k, &best_node, &low_con);
+				printf("gr = %d, wiesz = %d\n",j,k);
+				find_least_con(t, Macierz_s, nodes, g[j].gr_nodes[k], &best_node, &low_con);
 			}
-			printf("best node = %d, low con = %d\n",best_node,low_con);
+			//printf("best node = %d, low con = %d\n",best_node,low_con);
 			if(best_node != INT_MAX && low_con != INT_MAX){
 			g[j].gr_nodes[g[j].gr_size] = best_node;
 			g[j].gr_size++;
@@ -72,7 +75,7 @@ void find_smallest_con(node_t t, grupa_g g, double **Macierz_s, int nodes, int n
 void assign_groups(node_t t, double **Macierz_s, int nodes, int ngroups, double *eigenvector, int centlen, grupa_g g, double **Macierz_L){
 	//double *root_val = malloc(ngroups * sizeof(double)); // wartosci wlasne grup od ktorych zaczynamy przydzial do grup;
 	eigen_centyl(eigenvector, ngroups, nodes, t, g, Macierz_L);
-	int max_gr_size = 18; //<--- to trzeba dodac do argumentow funkcji albo obliczyc tutaj
+	int max_gr_size = 16; //<--- to trzeba dodac do argumentow funkcji albo obliczyc tutaj
 
 	find_smallest_con(t,g,Macierz_s,nodes,ngroups,max_gr_size);
 

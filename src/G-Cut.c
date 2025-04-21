@@ -224,10 +224,11 @@ int main(int argc, char **argv)
 	for(int k = 0; k <ngroups; k++){
 		printf("grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
-			int vle = t[i].vle;
-			if( t[i].group == k && vle != 0){
-					for(int j = 0; j < vle; j++)
-						printf("%d-%d\n",i,t[i].connected[j]);
+			if( t[i].group == k){
+					for(int j = i; j < nodes; j++){
+						if(t[j].group == k && Macierz_s[i][j] == 1)
+							printf("%d-%d\n",i,j);
+					}
 			}
 		}
 		printf("\n");
