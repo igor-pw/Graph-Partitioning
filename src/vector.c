@@ -208,13 +208,39 @@ double calculate_median(double *eigenvector, int groups, int n)
         return median;
 }
 
-void eigen_centyl(double *centyle, int n, double *v, int k){ //158
-	int div = (int)round(k/n);
-	for(int i =0; i<n; i++){
-		centyle[i] = v[i*div];
-		printf("podzial -> %lf\n",centyle[i]);
-	}
-	centyle[n]=v[k-1];
+double *eigen_centyl(double *eigenvector, int n, int k, double *root_val){ //158
+	double div = (double)k/n;
+	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
+	for(int i =1; i<n; i++){
+		int ind_k = (int)round(i*div);
+		int ind_p = (int)round((i-1)*div);
+		tmp = ind_p;
+		int size = ind_k-ind_p+1;
+		double *eigen_tmp = malloc(size * sizeof(double));
+		int count = 0;
+		for(int j = ind_p; j <= ind_k; j++){
+			eigen_tmp[count] = eigenvector[j];
+			count++;
+		}
+		if(size % 2 == 1)
+                root_val[i-1] = eigen_tmp[size/2+1];
+
+        	else if(size % 2 == 0)
+                root_val[i-1] = eigen_tmp[size/2];
+
+		printf("centyl %d -> %lf\n", i-1, root_val[i-1]);
+		free(eigen_tmp);
+		}
+	int size = k - tmp;
+	double *eigen_tmp = malloc(size * sizeof(double));
+	int count = 0;
+	for(int j = tmp; j < k; j++){
+		eigen_tmp[count] = eigenvector[j];
+		count++;
+		}
+	root_val[n-1] = calculate_median(eigen_tmp, 2, size);
+	free(eigen_tmp);
+	return root_val;
 }
 
 int compare(const void *a, const void *b)

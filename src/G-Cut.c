@@ -1,6 +1,7 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
 #include "headers/input.h"
+#include "headers/groups.h"
 #include <time.h>
 #define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
@@ -179,9 +180,9 @@ int main(int argc, char **argv)
 	
 	int centlen = ngroups+1;
 	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
-	double *centyle = malloc(centlen * sizeof(double));
+	//double *centyle = malloc(centlen * sizeof(double));
 	printf("centyle: \n");
-	eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
+	//eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
 	print_vec(eigenvector, nodes);
@@ -189,10 +190,11 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-	
-	assing_group(t,nodes,ngroups,centyle);
+	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen);
+	//assing_group(t,nodes,ngroups,centyle);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
-	connections(t,nodes, Macierz_s, &connections2);
+//	connections(t,nodes, Macierz_s, &connections2);
+	
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){

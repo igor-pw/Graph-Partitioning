@@ -344,7 +344,7 @@ void assing_eigen(node_t t, double *eigenvector, int n){
 }
 
 //	|	x	|	y	|	z	|
-
+/*
 void assing_group(node_t t, int n, int ngr, double *centyle){
 	for(int i =0; i<n; i++){
 			for(int j = 1; j <= ngr + 1; j++){
@@ -354,6 +354,7 @@ void assing_group(node_t t, int n, int ngr, double *centyle){
 	}
 	
 }
+*/
 
 void connections(node_t t, int n, double **A_matrix, int *connections2){
 	int v[n];
