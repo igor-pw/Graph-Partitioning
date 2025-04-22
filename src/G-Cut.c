@@ -3,7 +3,6 @@
 #include "headers/input.h"
 #include "headers/groups.h"
 #include <time.h>
-//#define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 int main(int argc, char **argv)
 {
@@ -54,14 +53,13 @@ int main(int argc, char **argv)
 		return 2;
 	}
 	divide = 17;
-	//margin = 0.01;
+	//margin = 0.1;
 	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
-	
-
 	//macierz sasiedztwa
 	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
+	//ogolnie to nie mozemy stworzyc kopii macierzy bo za duzo miejsca zajmuje trzeba wszystkie operacje robic na jednej
 	double **Macierz_s = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
@@ -83,7 +81,11 @@ int main(int argc, char **argv)
 	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); // to ile moze byc najmniej w grupie z marginesem
 	// zrobilem to w to bo np avg moze byc 1.4 i jak zaokrogle to margines moze sie rozjechac
 
-	if(max_nodes*divide < nodes){
+	//cos tu nie gra bo dla marginesu 1% max jest mniejszy od low
+	printf("nodes: %d, avg: %d, max: %d, low: %d, avg*nodes: %d\n", nodes, avg_nodes, max_nodes, low_nodes, avg_nodes*divide);
+
+	//noi ten warunek nie wiem dlaczego tez nie dziala bo przechodzi dla 105 < 102 co nie jest prawda
+	if(max_nodes*divide < nodes){		
 		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
 		printf("prosze zmienic ilosc grup na jaka chcemy podzielic graf, badz zwiekszyc margines!\n");
 		return 1;
@@ -93,26 +95,28 @@ int main(int argc, char **argv)
 		g[i].gr_nodes = malloc(nodes * sizeof(double)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
 	}	
 
-	//macierz diagonalna obliczona na podstawie macierzy sasiedztwa
-	double **D_matrix = create_D_matrix(A_matrix, nodes, &D_norm);
-	printf("Macierz Diagonalna\n");
+	//wektor stopni obliczony na podstawie macierzy sasiedztwa
+	//zmienilem na wektor zeby mniej pamieci zajmowalo
+	double *D_vector = create_D_vector(A_matrix, nodes, &D_norm);
+	printf("Wektor Stopni\n");
 	
 	//macierz Laplace'a
-	double **L_matrix = subtract_matrix(D_matrix, A_matrix, nodes);
+	double **L_matrix = create_L_matrix(A_matrix, D_vector, nodes);
 	printf("Macierz Laplace'a\n");
+	
+	//double **Macierz_L = NULL;
+	//tutaj tak samo nie mozemy tworzyc kopii bo dla duzych grafow sie wywala program
 	double **Macierz_L = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_L[i]=malloc(sizeof(double)*nodes);
 	copy_matrix(L_matrix, Macierz_L, nodes);
 	
-
-
 	//wektor poczatkowy	
-	double *initial_vec = create_initial_vec(D_matrix, D_norm, nodes);
+	double *initial_vec = create_initial_vec(D_vector, D_norm, nodes);
 	printf("Wektor poczatkowy\n");	
 
-	free_matrix(D_matrix, nodes);
-	
+	free(D_vector);
+
 	//poprzedni wektor poczatkowy
 	double *prev_initial_vec = malloc(sizeof(double) * nodes); //aktualnie pusty		
 
@@ -166,6 +170,8 @@ int main(int argc, char **argv)
 
 	double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
 
+	free_matrix(I_matrix, nodes);
+
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
@@ -187,8 +193,18 @@ int main(int argc, char **argv)
 
 	double *velocity = calloc(nodes, sizeof(double));
 
-	//wektor wlasny, nie wiem czy jest poprawnie policzony
-	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
+	double epsilon = 0.0;
+	double *eigenvector = NULL;
+
+	//wektor wlasny
+	
+	do
+	{
+		eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin, &epsilon);
+	
+	} while(epsilon > epsilon_margin);
+	
+	printf("epsilon: %g\n", epsilon);
 	printf("Wektor wlasny\n");
 	
 	assing_eigen(t,eigenvector,nodes);

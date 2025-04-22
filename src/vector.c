@@ -3,6 +3,26 @@
 //nie wiem czemu nie wczytuje z bibliteki
 #define M_PI 3.14159265358979323846
 
+static int depth = 0;
+
+double *create_D_vector(double **matrix, int n, int *D_norm)
+{	
+	//alokujemy pamiec na n wskaznikow do tablic
+        double *D_vector = malloc(sizeof(double) * n);	
+
+	int sum = 0;
+
+	for(int i = 0; i < n; i++){
+		sum = 0;
+		for(int j = 0; j < n; j++){ 
+			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
+		}
+		D_vector[i] = sum;	// wstawiamy do wektora wartosc sumy wiersza		
+		*D_norm += pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
+	}
+	return D_vector; // zwracamy wektor
+}
+
 double vec_norm(double *vec, int n)
 {
         //normalizacja wektora (dlugosc)
@@ -59,13 +79,13 @@ double multiply_vec_by_vec(double *vec, double *vecT, int n)
         return result;
 }
 
-double *create_initial_vec(double **D_matrix, int D_norm, int n)
+double *create_initial_vec(double *D_vector, int D_norm, int n)
 {
         //tworzy wektor poczatkowy
         double *initial_vec = malloc(sizeof(double) * n);
 
         for(int i = 0; i < n; i++)
-                initial_vec[i] = D_matrix[i][i]/sqrt((double)D_norm);
+                initial_vec[i] = D_vector[i]/sqrt((double)D_norm);
 
         return initial_vec;
 }
@@ -150,7 +170,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 
 }
 */
-double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin)
+double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon)
 {
 	//nowa wersja w trakcie
 	double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
@@ -159,40 +179,44 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;
 
-	double *new_velocity = malloc(sizeof(double) * n);
-
 	copy_vec(vec, r_vec, n);
 
 	double vec_norm = 0;
 	for(int i = 0; i < n; i++)
 	{
-		new_velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i];
-		vec[i] -= learning_rate*new_velocity[i];
+		velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i];
+		vec[i] -= learning_rate*velocity[i];
 		vec_norm += pow(vec[i], 2);
 	}
 
-	//copy_vec(new_velocity, velocity, n);
-
 	vec_norm = sqrt(vec_norm);
-
 	divide_vec(vec, vec_norm, n);
 
-	double epsilon = 0;
+	*epsilon = 0;
 
 	for(int i = 0; i < n; i++)
-		epsilon += (pow(vec[i]-r_vec[i], 2));
+		*epsilon += (pow(vec[i]-r_vec[i], 2));
 
-	printf("epsilon: %g\n", sqrt(fabs(epsilon)));
+	*epsilon = sqrt(*epsilon);
+	
+	printf("epsilon: %g\n", *epsilon);
 
 	free(r_vec);
 	free(gradient);
-	free(velocity);
 
-	if(sqrt(fabs(epsilon)) > epsilon_margin)
-		vec = calculate_eigenvector(vec, gradient_matrix, n, learning_rate, momentum, new_velocity, epsilon_margin);
+	depth++;
+	if(*epsilon > epsilon_margin && depth < 10000)
+	{	
+		vec = calculate_eigenvector(vec, gradient_matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon);
+	}
 
-	return vec;
-
+	if(depth >= 10000)
+	{
+		depth = 0;	
+		return NULL;
+	}
+	else
+		return vec;
 }
 
 double calculate_median(double *eigenvector, int groups, int n)

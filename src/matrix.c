@@ -123,6 +123,27 @@ double **create_D_matrix(double **matrix, int A_size, int *D_norm)
 	return dig; // zwracamy tablice
 }
 
+double **create_L_matrix(double **A_matrix, double *D_vector, int n)
+{
+	double **L_matrix = malloc(sizeof(double*) * n);
+
+	for(int i = 0; i < n; i++)
+		L_matrix[i] = calloc(n, sizeof(double));
+
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+		{		
+			if(A_matrix[i][j] == 1)
+				L_matrix[i][j] = -1;
+		}
+
+		L_matrix[i][i] = D_vector[i];
+	}
+
+	return L_matrix;
+}
+
 double **subtract_matrix(double **matrix1, double **matrix2, int n)
 {
 	//alokujemy pamiec na n wskaznikow do tablic	
