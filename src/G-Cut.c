@@ -106,7 +106,6 @@ int main(int argc, char **argv)
 	copy_matrix(L_matrix, Macierz_L, nodes);
 	
 
-	free_matrix(A_matrix, nodes);
 
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_matrix, D_norm, nodes);
@@ -186,7 +185,9 @@ int main(int argc, char **argv)
 	else
 		epsilon_margin = pow(10, -3);
 
-	double *velocity = calloc(n, sizeof(double));
+	epsilon_margin = pow(10, -6);
+
+	double *velocity = calloc(nodes, sizeof(double));
 
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
 	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
@@ -211,6 +212,7 @@ int main(int argc, char **argv)
 	printf("Przydzielanie grup\n");
 	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen, g, Macierz_L, max_nodes);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
+	connections(t,nodes, Macierz_s, &connections2);
 	
 	int lu = 0;
 	for(int i = 0; i < n; i++){
@@ -272,6 +274,7 @@ int main(int argc, char **argv)
 	print_gain(t, nodes);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
+	free_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);
 	free_matrix(Macierz_s, nodes);
 	free_matrix(Macierz_L, nodes);
