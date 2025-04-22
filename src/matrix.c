@@ -1,7 +1,7 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
 #include <ctype.h>
-#define am 16386
+#define am 102400
 
 double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 {
@@ -9,50 +9,54 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 
 	int size = 0;
 	char c = ';';
-	int position[am];
-	int position2[am];
+	int index[am];
+	
 	while(!isspace(c))
 	{
-		if(fscanf(in, "%d%c", &position[size], &c) == 2)
+		if(fscanf(in, "%d%c", &index[size], &c) == 2)
 			size++;
 	}
 
+	int start_index;
+	int end_index;
 	c = ';';
-	int temp = 0;
-	*t = (node_t)malloc(size * sizeof(struct node));
-
-	while(!isspace(c))
-	{		
-		if(fscanf(in, "%d%c", &position2[temp], &c) == 2)
-			temp++;
-	}
+	
 	int cl = 0;
 	int c2 = 0;
-	for(int i = 1; i<temp;i++){
-		int line = position2[i] - position2[i-1];
-		if(line != 0){
-			for(int j = position2[i-1]; j<position2[i];j++){
-			int x = position[j];
-			(*t)[c2].x = x;
-			(*t)[c2].y = cl;
-			(*t)[c2].nr = c2;
-			(*t)[c2].index = c2;
-			(*t)[c2].eigenvalue = 0.0;
-			c2++;
-			}
+	*t = (node_t)malloc(size * sizeof(struct node));
+
+	fscanf(in, "%d%c", &start_index, &c); 
+
+	while(!isspace(c))
+	{
+		if(fscanf(in, "%d%c", &end_index, &c) == 2)
+		{
+			int line = end_index - start_index;
+			if(line != 0)
+			{
+				for(int j = start_index; j< end_index; j++)
+				{
+					int x = index[j];
+					(*t)[c2].x = x;
+					(*t)[c2].y = cl;
+					(*t)[c2].nr = c2;
+					(*t)[c2].index = c2;
+					(*t)[c2].eigenvalue = 0.0;
+					c2++;
+				}
+
+				cl++;
+			}	
+			
+			start_index = end_index;
 		}
-		cl++;
 	}
 
-	
-	int index[am]; 
+	for(int i = 0; i < size; i++)
+		index[i] = 0;
 
-	//zredukowac do jednej tablicy
-	int index2[am];
-	
 	c = ';';
 	int counter = 0;
-	int counter2 = 0;
 	
 	while(!isspace(c))
 	{
@@ -60,37 +64,39 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 			counter++;
 	}
 
-	c = ';';
-	
-	while(!isspace(c))
-	{
-		if(fscanf(in, "%d%c", &index2[counter2], &c) == 2)
-			counter2++;
-		else
-			break;
-	}
-	
-
-	printf("Wczytywanie grafu\n");
-
 	//alokujemy pamiec na size wskaznikow do tablic
         double **matrix = malloc(sizeof(double*) * size);
 
 	//alokujemy pamiec na size elementow i wypelniamy zerami
         for(int i = 0; i < size; i++)
                 matrix[i] = calloc(size, sizeof(double));
+	
 	int countconnect = 0;
-	for(int i = 0; i < (counter2-1); i++)
-	{	
-		int y = index[index2[i]]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
-		for(int j = (index2[i] + 1); j < index2[i+1]; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
+	c = ';';
+	
+	fscanf(in, "%d%c", &start_index, &c);
+
+	while(!isspace(c))
+	{
+		if(fscanf(in, "%d%c", &end_index, &c) == 2)
 		{	
-			countconnect++;
-			int x = index[j]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
-			matrix[y][x] = 1;
-			matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
-		}	
+			int y = index[start_index]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
+			for(int j = (start_index + 1); j < end_index; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
+			{	
+				countconnect++;
+				int x = index[j]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
+				matrix[y][x] = 1;
+				matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
+			}
+
+			start_index = end_index;	
+		}
+		else
+			break;
 	}
+	
+
+	printf("Wczytywanie grafu\n");
 
 	*connections1 = countconnect;
 	*nodes = size;

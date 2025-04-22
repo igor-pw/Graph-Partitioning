@@ -57,10 +57,10 @@ int main(int argc, char **argv)
 
 	//macierz sasiedztwa
 	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
-	double **Macierz_s = malloc(sizeof(double*)*nodes);
+	/*double **Macierz_s = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
-	copy_matrix(A_matrix, Macierz_s, nodes);
+	copy_matrix(A_matrix, Macierz_s, nodes);*/
 	printf("Macierz Sasiedztwa\n");
 	
 	fclose(in);
@@ -73,7 +73,6 @@ int main(int argc, char **argv)
 	double **L_matrix = subtract_matrix(D_matrix, A_matrix, nodes);
 	printf("Macierz Laplace'a\n");	
 
-	free_matrix(A_matrix, nodes);
 
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_matrix, D_norm, nodes);
@@ -157,7 +156,9 @@ int main(int argc, char **argv)
 	else
 		epsilon_margin = pow(10, -3);
 
-	double *velocity = calloc(n, sizeof(double));
+	epsilon_margin = pow(10, -6);
+
+	double *velocity = calloc(nodes, sizeof(double));
 
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
 	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
@@ -184,7 +185,7 @@ int main(int argc, char **argv)
 	
 	assing_group(t,nodes,ngroups,centyle);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
-	connections(t,nodes, Macierz_s, &connections2);
+	connections(t,nodes, A_matrix, &connections2);
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
@@ -222,6 +223,7 @@ int main(int argc, char **argv)
 	printf(" ilosc polanczen przed:\t %d,\n ilosc polaczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
+	free_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
 
