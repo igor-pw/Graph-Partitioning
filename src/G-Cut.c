@@ -185,8 +185,6 @@ int main(int argc, char **argv)
 	else
 		epsilon_margin = pow(10, -3);
 
-	epsilon_margin = pow(10, -6);
-
 	double *velocity = calloc(nodes, sizeof(double));
 
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
