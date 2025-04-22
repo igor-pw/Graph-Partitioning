@@ -72,12 +72,11 @@ void find_smallest_con(node_t t, grupa_g g, double **Macierz_s, int nodes, int n
 	}
 }
 
-void assign_groups(node_t t, double **Macierz_s, int nodes, int ngroups, double *eigenvector, int centlen, grupa_g g, double **Macierz_L){
+void assign_groups(node_t t, double **Macierz_s, int nodes, int ngroups, double *eigenvector, int centlen, grupa_g g, double **Macierz_L, int max_nodes){
 	//double *root_val = malloc(ngroups * sizeof(double)); // wartosci wlasne grup od ktorych zaczynamy przydzial do grup;
 	eigen_centyl(eigenvector, ngroups, nodes, t, g, Macierz_L);
-	int max_gr_size = 16; //<--- to trzeba dodac do argumentow funkcji albo obliczyc tutaj
 
-	find_smallest_con(t,g,Macierz_s,nodes,ngroups,max_gr_size);
+	find_smallest_con(t,g,Macierz_s,nodes,ngroups,max_nodes);
 
 //	ingr(t,nodes,ngroups,root_val);
 

@@ -3,7 +3,7 @@
 #include "headers/input.h"
 #include "headers/groups.h"
 #include <time.h>
-#define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
+//#define ITERATIONS 50 //to trzeba dostosowac do rozmiaru grafu bo jak bedzie co ma tylko 20 wierzcholkow to nie zadziala
 
 int main(int argc, char **argv)
 {
@@ -54,6 +54,7 @@ int main(int argc, char **argv)
 		return 2;
 	}
 	divide = 17;
+	//margin = 0.01;
 	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
@@ -68,6 +69,25 @@ int main(int argc, char **argv)
 	printf("Macierz Sasiedztwa\n");
 	
 	fclose(in);
+
+	int ITERATIONS;
+
+	if(nodes <= 50)
+		ITERATIONS = nodes-1;
+	else
+		ITERATIONS = 50;
+	
+	// ilosc wieszcholkow w grupach
+	int avg_nodes = (int)round((double)nodes/divide); // srednia ilosc wieszcholkow
+	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); // to ile moze byc max w grupie z marginesem
+	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); // to ile moze byc najmniej w grupie z marginesem
+	// zrobilem to w to bo np avg moze byc 1.4 i jak zaokrogle to margines moze sie rozjechac
+
+	if(max_nodes*divide < nodes){
+		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
+		printf("prosze zmienic ilosc grup na jaka chcemy podzielic graf, badz zwiekszyc margines!\n");
+		return 1;
+	}
 
 	for(int i = 0; i < divide; i++){
 		g[i].gr_nodes = malloc(nodes * sizeof(double)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
@@ -143,25 +163,16 @@ int main(int argc, char **argv)
 	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
 
 	free(eigenvalues_vec);
-	printf("1\n");
 	double **I_matrix = create_I_matrix(nodes, eigenvalue);
 
-	printf("2\n");
-	//for(int i = 0; i < nodes; i++)
-		//initial_vec[i] = L_matrix[i][i]/sqrt(D_norm); 
-
-	printf("3\n");
 	double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
 
-	printf("4\n");
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
-	printf("5\n");
 	if(nodes >= 200)
 		learning_rate = 0.01;
 
-	printf("6\n");
 	double epsilon_margin;
 
 	if(nodes <= 200)
@@ -175,10 +186,8 @@ int main(int argc, char **argv)
 	else
 		epsilon_margin = pow(10, -3);
 
-	printf("7\n");
 	double *velocity = calloc(n, sizeof(double));
 
-	printf("8\n");
 	//wektor wlasny, nie wiem czy jest poprawnie policzony
 	double *eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin);
 	printf("Wektor wlasny\n");
@@ -191,10 +200,6 @@ int main(int argc, char **argv)
 	int ngroups = divide;//////      56 linijka	 // divide; //<------ ILOSC GRUP (tymczasowo)
 	
 	int centlen = ngroups+1;
-	// |Najmniejsza wartosc | pomiedzy z rownymi odstempami|najwieksza wartosc| 
-	//double *centyle = malloc(centlen * sizeof(double));
-	printf("centyle: \n");
-	//eigen_centyl(centyle, ngroups, eigenvector, nodes); //174
 
 	printf("Wartosc wlasna: %g\n", eigenvalue);
 	print_vec(eigenvector, nodes);
@@ -202,10 +207,10 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen, g, Macierz_L);
-	//assing_group(t,nodes,ngroups,centyle);
+	
+	printf("Przydzielanie grup\n");
+	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen, g, Macierz_L, max_nodes);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
-//	connections(t,nodes, Macierz_s, &connections2);
 	
 	int lu = 0;
 	for(int i = 0; i < n; i++){
@@ -247,17 +252,29 @@ int main(int argc, char **argv)
 				countgr++;
 			}
 		}
-		printf("ilosc wieszoclkow w gr %d: %d\n", i , countgr);
+		printf("ilosc wieszoclkow w gr %d: %d", i , countgr);
+		if(countgr <low_nodes || countgr > max_nodes)
+			printf(" <---- grupa niezgonda z marginesem!!!!\n");
+		else
+			printf("\n");
 	}
+	int wolne_wieszcholki = 0;
+	for(int i =0; i< nodes; i++){
+		if(t[i].group == -1)
+			wolne_wieszcholki++;
+	}
+	printf("ilosc wolnych wieszcholkow: %d\n",wolne_wieszcholki);
 
 
-	printf(" ilosc polanczen przed:\t %d,\n ilosc polaczen po:\t %d, \n ilosc usunietych polonczen:\t %d, \n", connections1,connections2, connections1-connections2);
+
 
 	gain_calculate(t, Macierz_s, ngroups, nodes);
 	print_gain(t, nodes);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
 	free_matrix(L_matrix, nodes);
+	free_matrix(Macierz_s, nodes);
+	free_matrix(Macierz_L, nodes);
 	free(eigenvector);
 
 	return 0;
