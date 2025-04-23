@@ -199,7 +199,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 
 	*epsilon = sqrt(*epsilon);
 	
-	printf("epsilon: %g\n", *epsilon);
+	//printf("epsilon: %g\n", *epsilon);
 
 	free(r_vec);
 	free(gradient);

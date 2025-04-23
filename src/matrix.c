@@ -103,7 +103,7 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 	return matrix;
 }
 
-double **create_D_matrix(double **matrix, int A_size, int *D_norm)
+/*double **create_D_matrix(double **matrix, int A_size, int *D_norm)
 {	
 	//alokujemy pamiec na n wskaznikow do tablic
         double **dig = malloc(sizeof(double*) * A_size);	
@@ -121,7 +121,7 @@ double **create_D_matrix(double **matrix, int A_size, int *D_norm)
 		*D_norm += pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
 	}
 	return dig; // zwracamy tablice
-}
+}*/
 
 double **create_L_matrix(double **A_matrix, double *D_vector, int n)
 {

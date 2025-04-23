@@ -52,18 +52,16 @@ int main(int argc, char **argv)
 	if(n == 0){
 		return 2;
 	}
-	divide = 17;
-	//margin = 0.1;
 	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
 	//macierz sasiedztwa
 	double **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
 	//ogolnie to nie mozemy stworzyc kopii macierzy bo za duzo miejsca zajmuje trzeba wszystkie operacje robic na jednej
-	double **Macierz_s = malloc(sizeof(double*)*nodes);
+	/*double **Macierz_s = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_s[i]=malloc(sizeof(double)*nodes);
-	copy_matrix(A_matrix, Macierz_s, nodes);
+	copy_matrix(A_matrix, Macierz_s, nodes);*/
 	printf("Macierz Sasiedztwa\n");
 	
 	fclose(in);
@@ -75,8 +73,8 @@ int main(int argc, char **argv)
 	else
 		ITERATIONS = 50;
 	
-	// ilosc wieszcholkow w grupach
-	int avg_nodes = (int)round((double)nodes/divide); // srednia ilosc wieszcholkow
+	// ilosc wierzcholkow w grupach
+	int avg_nodes = (int)round((double)nodes/divide); // srednia ilosc wierzcholkow
 	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); // to ile moze byc max w grupie z marginesem
 	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); // to ile moze byc najmniej w grupie z marginesem
 	// zrobilem to w to bo np avg moze byc 1.4 i jak zaokrogle to margines moze sie rozjechac
@@ -99,17 +97,29 @@ int main(int argc, char **argv)
 	//zmienilem na wektor zeby mniej pamieci zajmowalo
 	double *D_vector = create_D_vector(A_matrix, nodes, &D_norm);
 	printf("Wektor Stopni\n");
-	
+
+	int all_edges = 0;
+
+	for(int i = 0; i < nodes; i++)
+		all_edges += D_vector[i];
+
+	all_edges /= 2;
+
 	//macierz Laplace'a
 	double **L_matrix = create_L_matrix(A_matrix, D_vector, nodes);
 	printf("Macierz Laplace'a\n");
-	
-	//double **Macierz_L = NULL;
+
+	//free_matrix(A_matrix, nodes);
+	//for(int i = 0; i < nodes; i++)
+	//	free(A_matrix[i]);
+
+	//free(A_matrix);
+
 	//tutaj tak samo nie mozemy tworzyc kopii bo dla duzych grafow sie wywala program
-	double **Macierz_L = malloc(sizeof(double*)*nodes);
+	/*double **Macierz_L = malloc(sizeof(double*)*nodes);
 	for(int i =0; i < nodes; i++)
 		Macierz_L[i]=malloc(sizeof(double)*nodes);
-	copy_matrix(L_matrix, Macierz_L, nodes);
+	copy_matrix(L_matrix, Macierz_L, nodes);*/
 	
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_vector, D_norm, nodes);
@@ -150,7 +160,6 @@ int main(int argc, char **argv)
 
 	free_matrix(Q_matrix, ITERATIONS);
 
-
 	printf("Wartosci wlasne\n");
 
 	//kopiujemy wartosci wlasne do wektora
@@ -165,12 +174,25 @@ int main(int argc, char **argv)
 	double eigenvalue = find_smallest_eigenvalue(eigenvalues_vec, ITERATIONS);
 	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
 
+	printf("eigenvalue: %g\n", eigenvalue);
+	
 	free(eigenvalues_vec);
-	double **I_matrix = create_I_matrix(nodes, eigenvalue);
+	//double **I_matrix = create_I_matrix(nodes, eigenvalue);
 
-	double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
+	//double **gradient_matrix = subtract_matrix(L_matrix, I_matrix, nodes);
+	double **gradient_matrix = malloc(sizeof(double*) * nodes);
+	
+	for(int i = 0; i < nodes; i++)
+		gradient_matrix[i] = malloc(sizeof(double) * nodes);
+	printf("alokacja\n");
 
-	free_matrix(I_matrix, nodes);
+	copy_matrix(L_matrix, gradient_matrix, nodes);
+
+	for(int i = 0; i < nodes; i++)
+		gradient_matrix[i][i] -= eigenvalue;	
+
+	//free_matrix(I_matrix, nodes);
+	printf("gradient matrix\n");
 
 	double learning_rate = 0.001;
 	double momentum = 0.8;
@@ -203,7 +225,9 @@ int main(int argc, char **argv)
 		eigenvector = calculate_eigenvector(initial_vec, gradient_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin, &epsilon);
 	
 	} while(epsilon > epsilon_margin);
-	
+
+	free_matrix(gradient_matrix, nodes);
+
 	printf("epsilon: %g\n", epsilon);
 	printf("Wektor wlasny\n");
 	
@@ -222,11 +246,13 @@ int main(int argc, char **argv)
 	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
 	double median = calculate_median(eigenvector, 2, nodes);
 	printf("Mediana: %lf\n", median);
-	
+
+	//return 2;
+
 	printf("Przydzielanie grup\n");
-	assign_groups(t, Macierz_s, nodes, ngroups, eigenvector, centlen, g, Macierz_L, max_nodes);
+	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, centlen, g, L_matrix, max_nodes);
 	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
-	connections(t,nodes, Macierz_s, &connections2);
+	connections(t,nodes, A_matrix, &connections2);
 	
 	int lu = 0;
 	for(int i = 0; i < n; i++){
@@ -241,20 +267,27 @@ int main(int argc, char **argv)
 		printf("\n");
 	}
 
+	int edges = 0;
+
 		printf("\n");
 	for(int k = 0; k <ngroups; k++){
 		printf("grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
 			if( t[i].group == k){
 					for(int j = i; j < nodes; j++){
-						if(t[j].group == k && Macierz_s[i][j] == 1)
+						if(t[j].group == k && A_matrix[i][j] == 1)
+						{
+							edges++;
 							printf("%d-%d\n",i,j);
+						}
 					}
 			}
 		}
 		printf("\n");
 
 	}
+
+	printf("usuniete krawedzie: %d\n", all_edges-edges);
 
 	int counter = 0;
 
@@ -284,14 +317,14 @@ int main(int argc, char **argv)
 
 
 
-	gain_calculate(t, Macierz_s, ngroups, nodes);
+	gain_calculate(t, A_matrix, ngroups, nodes);
 	print_gain(t, nodes);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
-	free_matrix(A_matrix, nodes);
+	//free_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);
-	free_matrix(Macierz_s, nodes);
-	free_matrix(Macierz_L, nodes);
+	//free_matrix(Macierz_s, nodes);
+	//free_matrix(Macierz_L, nodes);
 	free(eigenvector);
 
 	return 0;

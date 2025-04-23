@@ -9,7 +9,7 @@
 #include <stdbool.h>
 
 double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1);
-double **create_D_matrix(double **matrix, int A_size, int *D_norm);
+//double **create_D_matrix(double **matrix, int A_size, int *D_norm);
 double **create_L_matrix(double **A_matrix, double *D_vector, int n);
 double **subtract_matrix(double **matrix1, double **matrix2, int n);
 double **tri_matrix(double *a, double *b, int k);
