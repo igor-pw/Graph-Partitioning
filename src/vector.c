@@ -1,14 +1,11 @@
 #include "headers/vector.h"
 
-//nie wiem czemu nie wczytuje z bibliteki
-#define M_PI 3.14159265358979323846
-
 static int depth = 0;
 
-double *create_D_vector(double **matrix, int n, int *D_norm)
+int *create_D_vector(int **matrix, int n, int *D_norm)
 {	
 	//alokujemy pamiec na n wskaznikow do tablic
-        double *D_vector = malloc(sizeof(double) * n);	
+        int *D_vector = malloc(sizeof(int) * n);	
 
 	int sum = 0;
 
@@ -68,6 +65,7 @@ double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
 
         return result_vec;
 }
+
 double multiply_vec_by_vec(double *vec, double *vecT, int n)
 {
         //mnozy wektor przez wektor
@@ -79,13 +77,13 @@ double multiply_vec_by_vec(double *vec, double *vecT, int n)
         return result;
 }
 
-double *create_initial_vec(double *D_vector, int D_norm, int n)
+double *create_initial_vec(int *D_vector, int D_norm, int n)
 {
         //tworzy wektor poczatkowy
         double *initial_vec = malloc(sizeof(double) * n);
 
         for(int i = 0; i < n; i++)
-                initial_vec[i] = D_vector[i]/sqrt((double)D_norm);
+                initial_vec[i] = (double)(D_vector[i])/sqrt((double)D_norm);
 
         return initial_vec;
 }
@@ -124,55 +122,10 @@ double find_smallest_eigenvalue(double *vec, int n)
 
 	return eigenvalue;
 }
-/*
-double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin)
-{
-	//nowa wersja w trakcie
-	double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
-	double *gradient = multiply_mtx_by_vec(gradient_matrix, r_vec, n);
 
-	for(int i = 0; i < n; i++)
-		gradient[i] *= 2;
-	
-	double *new_velocity = malloc(sizeof(double) * n);	
-
-	copy_vec(vec, r_vec, n);
-
-	double vec_norm = 0;
-	for(int i = 0; i < n; i++)
-	{
-		new_velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i]; 
-		vec[i] -= learning_rate*new_velocity[i];
-		vec_norm += pow(vec[i], 2);
-	}
-		
-	//copy_vec(new_velocity, velocity, n);
-
-	vec_norm = sqrt(vec_norm);
-
-	divide_vec(vec, vec_norm, n);
-
-	double epsilon = 0;
-
-	for(int i = 0; i < n; i++)
-		epsilon += (pow(vec[i]-r_vec[i], 2));
-
-	//printf("epsilon: %g\n", sqrt(fabs(epsilon)));
-
-	free(r_vec);
-	free(gradient);
-	free(velocity);
-	
-	if(sqrt(fabs(epsilon)) > epsilon_margin)	
-		vec = calculate_eigenvector(vec, gradient_matrix, n, learning_rate, momentum, new_velocity, epsilon_margin);
-	
-	return vec;
-
-}
-*/
 double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon)
 {
-	//nowa wersja w trakcie
+	//nowa wersja
 	double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
 	double *gradient = multiply_mtx_by_vec(gradient_matrix, r_vec, n);
 
@@ -232,7 +185,7 @@ double calculate_median(double *eigenvector, int groups, int n)
         return median;
 }
 
-void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g ,double **Macierz_L){ //158
+void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double **L_matrix){ //158
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
 	
@@ -270,8 +223,8 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g ,double
 		double pk = eigen_tmp[size-1];
 		for(int j = 0; j< size; j++){
 			int nr = node_gr[j];
-			if(Macierz_L[nr][nr] > max_len){
-				max_len = Macierz_L[nr][nr];
+			if(L_matrix[nr][nr] > max_len){
+				max_len = L_matrix[nr][nr];
 				node = nr;
 				xd = eigen_tmp[j]; 
 			}
@@ -307,8 +260,8 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g ,double
 
 	for(int j = 0; j< size; j++){
 		int nr = node_gr[j];
-		if(Macierz_L[nr][nr] > max_len){
-			max_len = Macierz_L[nr][nr];
+		if(L_matrix[nr][nr] > max_len){
+			max_len = L_matrix[nr][nr];
 			node = nr;
 		}
 	}

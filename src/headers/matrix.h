@@ -8,11 +8,9 @@
 #include <math.h>
 #include <stdbool.h>
 
-double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1);
-//double **create_D_matrix(double **matrix, int A_size, int *D_norm);
-double **create_L_matrix(double **A_matrix, double *D_vector, int n);
-double **subtract_matrix(double **matrix1, double **matrix2, int n);
-double **tri_matrix(double *a, double *b, int k);
+int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1);
+double **create_L_matrix(int **A_matrix, int *D_vector, int n);
+double **create_T_matrix(double *a, double *b, int k);
 void print_matrix(double **matrix, int n);
 void calculate_coefs(double **L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k);
 double **create_G_matrix(double **T_matrix, int n, int x);
@@ -22,12 +20,11 @@ double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
 void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void force_zeros(double **matrix, int n, double margin);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
-double **create_I_matrix(int n, double coef);
 void assing_eigen(node_t t, double *eigenvector, int n);
-//void assing_group(node_t t, int n, int ngr, double *centle);
-void connections(node_t t, int n, double **A_matrix, int *connections2);
-void gain_calculate(node_t t, double  **Macierz_s, int ngroups, int nodes);
+void connections(node_t t, int n, int **A_matrix, int *connections2);
+void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes);
 void print_gain(node_t t, int nodes);
 void free_matrix(double **matrix, int n);
+void free_int_matrix(int **matrix, int n);
 
 #endif

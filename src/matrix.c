@@ -1,12 +1,11 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
 #include <ctype.h>
-#define am 102400
+#define am 153600
 
-double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
+int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 {
 	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
-
 	int size = 0;
 	char c = ';';
 	int index[am];
@@ -65,11 +64,11 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 	}
 
 	//alokujemy pamiec na size wskaznikow do tablic
-        double **matrix = malloc(sizeof(double*) * size);
+        int **matrix = malloc(sizeof(int*) * size);
 
 	//alokujemy pamiec na size elementow i wypelniamy zerami
         for(int i = 0; i < size; i++)
-                matrix[i] = calloc(size, sizeof(double));
+                matrix[i] = calloc(size, sizeof(int));
 	
 	int countconnect = 0;
 	c = ';';
@@ -103,27 +102,7 @@ double **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 	return matrix;
 }
 
-/*double **create_D_matrix(double **matrix, int A_size, int *D_norm)
-{	
-	//alokujemy pamiec na n wskaznikow do tablic
-        double **dig = malloc(sizeof(double*) * A_size);	
-
-        for(int i = 0; i < A_size; i++)
-                dig[i] = calloc(A_size, sizeof(double)); // tworzymy macierz o rozmiarze A_size i wypelniamy ja zerami
-	int sum = 0;
-
-	for(int i = 0; i < A_size; i++){
-		sum = 0;
-		for(int j = 0; j < A_size; j++){ 
-			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
-		}
-		dig[i][i] = sum;	// ustawiamy na lini diagonalnej wartosc sumy wiersza		
-		*D_norm += pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
-	}
-	return dig; // zwracamy tablice
-}*/
-
-double **create_L_matrix(double **A_matrix, double *D_vector, int n)
+double **create_L_matrix(int **A_matrix, int *D_vector, int n)
 {
 	double **L_matrix = malloc(sizeof(double*) * n);
 
@@ -144,22 +123,7 @@ double **create_L_matrix(double **A_matrix, double *D_vector, int n)
 	return L_matrix;
 }
 
-double **subtract_matrix(double **matrix1, double **matrix2, int n)
-{
-	//alokujemy pamiec na n wskaznikow do tablic	
-        double **sub = malloc(sizeof(double*) * n);	
-	for(int i = 0; i < n; i++)
-                sub[i] = calloc(n, sizeof(double)); // tworzymy macierz o rozmiarze n i wypelniamy ja zerami
-	
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < n; j++){
-			sub[i][j] = matrix1[i][j] - matrix2[i][j]; // odejmujemy od elemntu macierzy1 elemnt macierzy2
-		}
-	}
-	return sub; // zwracamy roznice macierzy
-}
-
-double **tri_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
+double **create_T_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
 	//dodane do ulatwienia testowania funkcji	
 	double **tri = malloc(sizeof(double*) * k);
 
@@ -351,20 +315,6 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	}	
 }
 
-double **create_I_matrix(int n, double coef)
-{
-	//stworzenie macierzy jednostkowej przemnozonej przez wspolczynnik
-	double **I_matrix = malloc(sizeof(double*) * n);
-
-	for(int i = 0; i < n; i++)
-		I_matrix[i] = calloc(n, sizeof(double));
-
-	for(int i = 0; i < n; i++)
-		I_matrix[i][i] = coef;
-
-	return I_matrix;
-}
-
 void assing_eigen(node_t t, double *eigenvector, int n){
 	for(int i =0; i <n; i++)
 			t[i].eigenvalue=eigenvector[i];
@@ -383,7 +333,7 @@ void assing_group(node_t t, int n, int ngr, double *centyle){
 }
 */
 
-void connections(node_t t, int n, double **A_matrix, int *connections2){
+void connections(node_t t, int n, int **A_matrix, int *connections2){
 	int v[n];
 	int count = 0;
 	for(int i =0; i < n; i++){
@@ -402,7 +352,7 @@ void connections(node_t t, int n, double **A_matrix, int *connections2){
 	}
 }
 
-void gain_calculate(node_t t, double **Macierz_s, int ngroups, int nodes){
+void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes){
 	int dif[ngroups];
 	for(int i =0; i < nodes; i++){
 		int cur_node_gr = t[i].group;
@@ -410,7 +360,7 @@ void gain_calculate(node_t t, double **Macierz_s, int ngroups, int nodes){
 			dif[j] = 0;
 		}
 		for(int j = 0; j < nodes; j++){
-			if(Macierz_s[i][j] == 1) dif[t[j].group]++;	
+			if(A_matrix[i][j] == 1) dif[t[j].group]++;	
 		}
 		int min = INFINITY;
 		int gr = -1;
@@ -442,6 +392,14 @@ void print_gain(node_t t, int nodes){
 }
 
 void free_matrix(double **matrix, int n)
+{
+	for(int i = 0; i < n; i++)
+		free(matrix[i]);
+
+	free(matrix);
+}
+
+void free_int_matrix(int **matrix, int n)
 {
 	for(int i = 0; i < n; i++)
 		free(matrix[i]);
