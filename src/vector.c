@@ -172,19 +172,6 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 		return vec;
 }
 
-double calculate_median(double *eigenvector, int groups, int n)
-{
-        double median;
-
-        if(n % 2 == 1)
-                median = eigenvector[n/groups+1];
-
-        else if(n % 2 == 0)
-                median = (eigenvector[n/groups] + eigenvector[n/groups+1])/2;
-
-        return median;
-}
-
 void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double **L_matrix){ //158
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;

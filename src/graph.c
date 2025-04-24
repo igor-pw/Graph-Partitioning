@@ -36,7 +36,7 @@ void print_results(node_t t, int nodes, int ngroups, int **A_matrix, int max_nod
 	}
 
 
-	printf("ilosc wszystkich wieszcholkow: %d\n", nodes);
+	printf("ilosc wszystkich wierzcholkow: %d\n", nodes);
 	for(int i = 0; i < ngroups; i ++){
 		int countgr = 0;
 		for(int j = 0; j < nodes; j ++){
@@ -44,7 +44,7 @@ void print_results(node_t t, int nodes, int ngroups, int **A_matrix, int max_nod
 				countgr++;
 			}
 		}
-		printf("ilosc wieszoclkow w gr %d: %d", i , countgr);
+		printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 		if(countgr <low_nodes || countgr > max_nodes)
 			printf(" <---- grupa niezgonda z marginesem!!!!\n");
 		else
@@ -55,8 +55,9 @@ void print_results(node_t t, int nodes, int ngroups, int **A_matrix, int max_nod
 		if(t[i].group == -1)
 			wolne_wieszcholki++;
 	}
-	printf("ilosc wolnych wieszcholkow: %d\n",wolne_wieszcholki);
+	printf("ilosc wolnych wierzcholkow: %d\n",wolne_wieszcholki);
 
-	printf("pocztkowa ilosc krawedzi: %d\n", all_edges);
+	printf("poczatkowa ilosc krawedzi: %d\n", all_edges);
 	printf("usuniete krawedzie: %d\n", all_edges-edges);
+	printf("procent usunietych krawedzi: %g\n", (double)(all_edges-edges)/(double)(all_edges));
 }

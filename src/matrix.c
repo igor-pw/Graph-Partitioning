@@ -79,23 +79,28 @@ int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 	{
 		if(fscanf(in, "%d%c", &end_index, &c) == 2)
 		{	
-			int y = index[start_index]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[] 
-			for(int j = (start_index + 1); j < end_index; j++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
+			int y = index[start_index]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[]
+			for(int i = (start_index + 1); i < end_index; i++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
 			{	
 				countconnect++;
-				int x = index[j]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
+				int x = index[i]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
 				matrix[y][x] = 1;
 				matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
 			}
 
 			start_index = end_index;	
 		}
-		else
-			break;
-	}
+	}	
 	
+	int y = index[start_index];
 
-	printf("Wczytywanie grafu\n");
+	for(int i = (start_index + 1); i < counter; i++)
+	{
+		countconnect++;
+                int x = index[i]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
+                matrix[y][x] = 1;
+                matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
+	}
 
 	*connections1 = countconnect;
 	*nodes = size;
@@ -261,17 +266,6 @@ double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
 	return result_matrix;
 }
 
-void force_zeros(double **matrix, int n, double margin)
-{
-	for(int i = 0; i < n; i++)
-	{
-		for(int j = 0; j < n; j++)
-			if(i != j && matrix[i][j] <= margin && matrix[i][j] >= -margin)
-					matrix[i][j] = 0.f;
-	}
-
-}
-
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 {
 	//tworzy transponowana macierz rotacji Givensa
@@ -299,6 +293,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 		free_matrix(new_Q_matrix, n);
 	}
 
+	free_matrix(G_matrix, n);
 	i++;
 
 	if(i < n-1)
@@ -310,7 +305,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 		double **new_T_matrix = multiply_mtx_by_mtx(T_matrix, Q_matrix, n);
 		copy_matrix(new_T_matrix, T_matrix, n);
 		//pozbywamy sie bledow numerycznych
-		force_zeros(T_matrix, n, 0.01);
+		//force_zeros(T_matrix, n, 0.001);
 		free_matrix(new_T_matrix, n);
 	}	
 }
@@ -352,27 +347,35 @@ void connections(node_t t, int n, int **A_matrix, int *connections2){
 	}
 }
 
-void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes){
+void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes)
+{
 	int dif[ngroups];
-	for(int i =0; i < nodes; i++){
+	
+	for(int i = 0; i < nodes; i++)
+	{
 		int cur_node_gr = t[i].group;
-		for(int j = 0; j < ngroups; j++){
+		for(int j = 0; j < ngroups; j++)
 			dif[j] = 0;
-		}
-		for(int j = 0; j < nodes; j++){
+
+		for(int j = 0; j < nodes; j++)
 			if(A_matrix[i][j] == 1) dif[t[j].group]++;	
-		}
+		
 		int min = INT_MAX;
 		int gr = -1;
-		for(int j = 0; j < ngroups; j++){
-			if( dif[j] != 0 ){
+		for(int j = 0; j < ngroups; j++)
+		{
+			if( dif[j] != 0 )
+			{
 				int tmp = dif[cur_node_gr] - dif[j];
-				if(tmp < min){
+				
+				if(tmp < min)
+				{
 					min = tmp;
 					gr = j;
 				}
 			}
 		}
+		
 		if(gr == cur_node_gr){ // jesli mamy polonczenie tylko z gupa do ktorej nalezymy to gain = ilosci przejsc do tej grupy 
 			t[i].gr_gain = gr;
 			t[i].gain = dif[gr];
@@ -385,7 +388,8 @@ void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes){
 	}
 }
 
-void print_gain(node_t t, int nodes){
+void print_gain(node_t t, int nodes)
+{
 	for(int i =0; i < nodes; i++){
 		printf("wieszcholek %d z grupy %d -> gain group %d gain %d\n",i,t[i].group,t[i].gr_gain,t[i].gain);
 	}
@@ -406,3 +410,4 @@ void free_int_matrix(int **matrix, int n)
 
 	free(matrix);
 }
+

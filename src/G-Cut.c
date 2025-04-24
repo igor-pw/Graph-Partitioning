@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	if(n == 0){
 		return 2;
 	}
-	divide = 117;
+	//divide = 117;
 	//margin = 0.01;
 	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	grupa_g g = malloc(divide * sizeof(struct grupa));
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	int ITERATIONS;
 
 	if(nodes <= 50)
-		ITERATIONS = nodes-1;
+		ITERATIONS = nodes;
 	else if(nodes > 50 && nodes <= 10000)
 		ITERATIONS = 50;
 	else if(nodes > 10000 && nodes <= 25000)
@@ -91,8 +91,8 @@ int main(int argc, char **argv)
 	}
 
 	for(int i = 0; i < divide; i++){
-		g[i].gr_nodes = malloc(nodes * sizeof(double)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
-		g[i].no_con = calloc(nodes, sizeof(double));
+		g[i].gr_nodes = malloc(nodes * sizeof(int)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
+		g[i].no_con = calloc(nodes, sizeof(int));
 	}	
 
 	//wektor stopni obliczony na podstawie macierzy sasiedztwa
@@ -126,7 +126,6 @@ int main(int argc, char **argv)
 	calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
 	printf("Wspolczynniki alfa i beta\n");
 
-	//free(initial_vec);
 	free(prev_initial_vec);
 
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
@@ -201,6 +200,8 @@ int main(int argc, char **argv)
 	
 	} while(epsilon > epsilon_margin);
 
+	free(velocity);
+
 	//cofniecie zmian w macierzy Laplace'a
 	for(int i = 0; i < nodes; i++)
 		L_matrix[i][i] += eigenvalue;	
@@ -213,26 +214,30 @@ int main(int argc, char **argv)
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
-	int ngroups = divide;//////      56 linijka	 // divide; //<------ ILOSC GRUP (tymczasowo)
+	int ngroups = divide;
 	
 	printf("Wartosc wlasna: %g\n", eigenvalue);
-	print_vec(eigenvector, nodes);
+	//print_vec(eigenvector, nodes);
 	
-	//obliczamy mediane, narazie tylko dla podzialu na 2 czesc
-	double median = calculate_median(eigenvector, 2, nodes);
-	printf("Mediana: %lf\n", median);
-
 	printf("Przydzielanie grup\n");
 	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
 	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);
 
 	gain_calculate(t, A_matrix, ngroups, nodes);
-	//print_gain(t, nodes);
+	print_gain(t, nodes);
 
-	//gdzies jeszcze nie jest zwalniana pamiec
+	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
 	free_int_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
+	free(D_vector);
+	for(int i = 0; i < divide; i++){
+                free(g[i].gr_nodes);
+                free(g[i].no_con);
+        } 	
+	
+	free(t);
+	free(g);
 
 	return 0;
 }
