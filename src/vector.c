@@ -172,12 +172,12 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 		return vec;
 }
 
-void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double **L_matrix){ //158
+void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix){ //158
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
 	
 	for(int i = 0; i< k; i++)
-		t[i].group = -1;
+		t[i]->group = -1;
 
 	for(int i =1; i<n; i++){
 		int ind_k = (int)round(i*div);
@@ -197,7 +197,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double
 		int *node_gr = malloc(size * sizeof(int));
 		for(int j = 0; j < size; j++){
 			for(int l =0; l < k; l++){
-				if(eigen_tmp[j] == t[l].eigenvalue){
+				if(eigen_tmp[j] == t[l]->eigenvalue){
 					node_gr[j] = l;
 					break;
 				}
@@ -219,7 +219,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double
 
 		g[i-1].gr_nodes[0] = node;
 		g[i-1].gr_size =1;
-		t[node].group = i-1;
+		t[node]->group = i-1;
 		
 		printf("Najwiecej polonczen w gr %d ma wieszcholek %d -> %d\t przedzial - %.15lf, %.15lf  wartosc - %.15lf\n", i-1, g[i-1].gr_nodes[0], max_len, pj,pk,xd);
 		free(eigen_tmp);
@@ -238,7 +238,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double
 	int *node_gr = malloc(size * sizeof(int));
 	for(int j = 0; j < size; j++){
 		for(int l =0; l < k; l++){
-			if(eigen_tmp[j] == t[l].eigenvalue){
+			if(eigen_tmp[j] == t[l]->eigenvalue){
 				node_gr[j] = l;
 				break;
 			}
@@ -255,7 +255,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t t, grupa_g g, double
 
 	g[n-1].gr_nodes[0] = node;
 	g[n-1].gr_size =1;
-	t[node].group = n-1;
+	t[node]->group = n-1;
 
 	
 	free(eigen_tmp);

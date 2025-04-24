@@ -14,11 +14,7 @@ typedef struct grupa{
 	int gr_size;
 } * grupa_g;
 
-//void print_results(node_t t, int nodes, int ngroups, int **Macierz_s, int max_nodes, int low_nodes);
+void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
+void free_struct_node(node_t *t, int n);
 
-/*
-void scan_flags(int argc, char **argc, char *flag_value);
-void divide_graph(double **A_matrix, node_t **nodes, int n);
-void print_input(double **A_matrix, node_t **nodes, char *file_name ,int n);
-*/
 #endif

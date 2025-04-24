@@ -54,13 +54,15 @@ int main(int argc, char **argv)
 	}
 	//divide = 117;
 	//margin = 0.01;
-	node_t t = NULL;// = malloc(n * sizeof(struct node));
+	node_t *t = NULL;
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
 	//macierz sasiedztwa
 	int **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
 	printf("Macierz Sasiedztwa\n");
-	
+
+	printf("%p\n", t);
+
 	fclose(in);
 
 	int ITERATIONS;
@@ -209,22 +211,22 @@ int main(int argc, char **argv)
 	printf("epsilon: %g\n", epsilon);
 	printf("Wektor wlasny\n");
 	
-	assing_eigen(t,eigenvector,nodes);
+	assing_eigen(t, eigenvector,nodes);
+
+	printf("Przydzielenie wartosci wektora wlasnego\n");
 
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
 	int ngroups = divide;
 	
-	printf("Wartosc wlasna: %g\n", eigenvalue);
-	//print_vec(eigenvector, nodes);
-	
-	printf("Przydzielanie grup\n");
 	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
-	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);
+	printf("Przydzielenie grup\n");
+	
+	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
 
 	gain_calculate(t, A_matrix, ngroups, nodes);
-	print_gain(t, nodes);
+	//print_gain(t, nodes);
 
 	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
 	free_int_matrix(A_matrix, nodes);
@@ -236,7 +238,7 @@ int main(int argc, char **argv)
                 free(g[i].no_con);
         } 	
 	
-	free(t);
+	free_struct_node(t, nodes);
 	free(g);
 
 	return 0;

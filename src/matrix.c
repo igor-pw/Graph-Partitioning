@@ -3,7 +3,7 @@
 #include <ctype.h>
 #define am 153600
 
-int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
+int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 {
 	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
 	int size = 0;
@@ -22,7 +22,7 @@ int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 	
 	int cl = 0;
 	int c2 = 0;
-	*t = (node_t)malloc(size * sizeof(struct node));
+	*t = malloc(size * sizeof(node_t));
 
 	fscanf(in, "%d%c", &start_index, &c); 
 
@@ -33,20 +33,21 @@ int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1)
 			int line = end_index - start_index;
 			if(line != 0)
 			{
-				for(int j = start_index; j< end_index; j++)
+				for(int j = start_index; j < end_index; j++)
 				{
 					int x = index[j];
-					(*t)[c2].x = x;
-					(*t)[c2].y = cl;
-					(*t)[c2].nr = c2;
-					(*t)[c2].index = c2;
-					(*t)[c2].eigenvalue = 0.0;
+					(*t)[c2] = malloc(sizeof(struct node));
+					(*t)[c2]->x = x;
+					(*t)[c2]->y = cl;
+					(*t)[c2]->nr = c2;
+					(*t)[c2]->index = c2;
+					(*t)[c2]->eigenvalue = 0.0;
 					c2++;
 				}
 
-				cl++;
-			}	
-			
+			}
+
+			cl++;
 			start_index = end_index;
 		}
 	}
@@ -310,9 +311,9 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	}	
 }
 
-void assing_eigen(node_t t, double *eigenvector, int n){
+void assing_eigen(node_t *t, double *eigenvector, int n){
 	for(int i =0; i <n; i++)
-			t[i].eigenvalue=eigenvector[i];
+			t[i]->eigenvalue=eigenvector[i];
 }
 
 //	|	x	|	y	|	z	|
@@ -347,18 +348,18 @@ void connections(node_t t, int n, int **A_matrix, int *connections2){
 	}
 }
 
-void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes)
+void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes)
 {
 	int dif[ngroups];
 	
 	for(int i = 0; i < nodes; i++)
 	{
-		int cur_node_gr = t[i].group;
+		int cur_node_gr = t[i]->group;
 		for(int j = 0; j < ngroups; j++)
 			dif[j] = 0;
 
 		for(int j = 0; j < nodes; j++)
-			if(A_matrix[i][j] == 1) dif[t[j].group]++;	
+			if(A_matrix[i][j] == 1) dif[t[j]->group]++;	
 		
 		int min = INT_MAX;
 		int gr = -1;
@@ -377,21 +378,21 @@ void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes)
 		}
 		
 		if(gr == cur_node_gr){ // jesli mamy polonczenie tylko z gupa do ktorej nalezymy to gain = ilosci przejsc do tej grupy 
-			t[i].gr_gain = gr;
-			t[i].gain = dif[gr];
+			t[i]->gr_gain = gr;
+			t[i]->gain = dif[gr];
 		}
 		else{
-			t[i].gr_gain = gr;
-			t[i].gain = min;
+			t[i]->gr_gain = gr;
+			t[i]->gain = min;
 		}
 		
 	}
 }
 
-void print_gain(node_t t, int nodes)
+void print_gain(node_t *t, int nodes)
 {
 	for(int i =0; i < nodes; i++){
-		printf("wieszcholek %d z grupy %d -> gain group %d gain %d\n",i,t[i].group,t[i].gr_gain,t[i].gain);
+		printf("wieszcholek %d z grupy %d -> gain group %d gain %d\n",i,t[i]->group,t[i]->gr_gain,t[i]->gain);
 	}
 }
 
