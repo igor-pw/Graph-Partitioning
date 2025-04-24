@@ -52,6 +52,8 @@ int main(int argc, char **argv)
 	if(n == 0){
 		return 2;
 	}
+	divide = 117;
+	//margin = 0.01;
 	node_t t = NULL;// = malloc(n * sizeof(struct node));
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
@@ -90,6 +92,7 @@ int main(int argc, char **argv)
 
 	for(int i = 0; i < divide; i++){
 		g[i].gr_nodes = malloc(nodes * sizeof(double)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
+		g[i].no_con = calloc(nodes, sizeof(double));
 	}	
 
 	//wektor stopni obliczony na podstawie macierzy sasiedztwa
@@ -212,8 +215,6 @@ int main(int argc, char **argv)
 
 	int ngroups = divide;//////      56 linijka	 // divide; //<------ ILOSC GRUP (tymczasowo)
 	
-	int centlen = ngroups+1;
-
 	printf("Wartosc wlasna: %g\n", eigenvalue);
 	print_vec(eigenvector, nodes);
 	
@@ -222,74 +223,11 @@ int main(int argc, char **argv)
 	printf("Mediana: %lf\n", median);
 
 	printf("Przydzielanie grup\n");
-	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, centlen, g, L_matrix, max_nodes);
-	int connections2 =0;//to liczy tylko raz czyli z 1 do 2 a nie z 1 do 2 i z 2 do 1
-	connections(t,nodes, A_matrix, &connections2);
-	
-	int lu = 0;
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < n; j++){
-			if(t[lu].y == i && t[lu].x ==j){
-				printf("1 ");
-				lu++;
-			}
-			else
-				printf("0 ");
-		}
-		printf("\n");
-	}
-
-	int edges = 0;
-
-		printf("\n");
-	for(int k = 0; k <ngroups; k++){
-		printf("grupa %d\n", k);
-		for(int i =0; i<nodes; i++){
-			if( t[i].group == k){
-					for(int j = i; j < nodes; j++){
-						if(t[j].group == k && A_matrix[i][j] == 1)
-						{
-							edges++;
-							printf("%d-%d\n",i,j);
-						}
-					}
-			}
-		}
-		printf("\n");
-
-	}
-
-
-	int counter = 0;
-
-	while(eigenvector[counter] < median)
-		counter++;
-	printf("ilosc wszystkich wieszcholkow: %d\n", nodes);
-	for(int i = 0; i < ngroups; i ++){
-		int countgr = 0;
-		for(int j = 0; j < nodes; j ++){
-			if(t[j].group == i){
-				countgr++;
-			}
-		}
-		printf("ilosc wieszoclkow w gr %d: %d", i , countgr);
-		if(countgr <low_nodes || countgr > max_nodes)
-			printf(" <---- grupa niezgonda z marginesem!!!!\n");
-		else
-			printf("\n");
-	}
-	int wolne_wieszcholki = 0;
-	for(int i =0; i< nodes; i++){
-		if(t[i].group == -1)
-			wolne_wieszcholki++;
-	}
-	printf("ilosc wolnych wieszcholkow: %d\n",wolne_wieszcholki);
+	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
+	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);
 
 	gain_calculate(t, A_matrix, ngroups, nodes);
-	print_gain(t, nodes);
-	
-	printf("pocztkowa ilosc krawedzi: %d\n", all_edges);
-	printf("usuniete krawedzie: %d\n", all_edges-edges);
+	//print_gain(t, nodes);
 
 	//gdzies jeszcze nie jest zwalniana pamiec
 	free_int_matrix(A_matrix, nodes);

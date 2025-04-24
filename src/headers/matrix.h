@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <limits.h>
 
 int **create_A_matrix(FILE *in, int *nodes, node_t *t, int *connections1);
 double **create_L_matrix(int **A_matrix, int *D_vector, int n);
@@ -26,5 +27,6 @@ void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes);
 void print_gain(node_t t, int nodes);
 void free_matrix(double **matrix, int n);
 void free_int_matrix(int **matrix, int n);
+void print_results(node_t t, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
 
 #endif

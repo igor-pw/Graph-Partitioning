@@ -362,7 +362,7 @@ void gain_calculate(node_t t, int **A_matrix, int ngroups, int nodes){
 		for(int j = 0; j < nodes; j++){
 			if(A_matrix[i][j] == 1) dif[t[j].group]++;	
 		}
-		int min = INFINITY;
+		int min = INT_MAX;
 		int gr = -1;
 		for(int j = 0; j < ngroups; j++){
 			if( dif[j] != 0 ){

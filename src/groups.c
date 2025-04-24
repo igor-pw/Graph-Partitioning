@@ -27,7 +27,6 @@ void first_con(node_t t, double **Macierz_s, int nodes, int ngroups){
 
 int con_am(node_t t, int **A_matrix, int nodes, int node){
 	int tmp = 0;
-	int cur_gr = t[node].group;
 	for(int i = 0; i < nodes; i++){
 		if(A_matrix[node][i] != 0 && t[i].group == -1){
 			tmp++;
@@ -37,7 +36,6 @@ int con_am(node_t t, int **A_matrix, int nodes, int node){
 }
 
 void find_least_con(node_t t, int **A_matrix, int nodes, int node, int *best_node, int * low_con){
-	int cur_gr = t[node].group;
 	for(int i = 0; i < nodes; i++){
 		//printf("gr = %d, Macierz = %d, czy ma gr = %d, badany node = %d\n",cur_gr, Macierz_s[node][i], t[i].group, node);
 		if(A_matrix[node][i] != 0 && t[i].group == -1){
@@ -58,8 +56,12 @@ void find_smallest_con(node_t t, grupa_g g, int **A_matrix, int nodes, int ngrou
 			int best_node = INT_MAX;
 			int low_con = INT_MAX;
 			for(int k = 0; k < g[j].gr_size; k++){
-				printf("gr = %d, wiesz = %d\n",j,k);
+				//printf("gr = %d, wiesz = %d\n",j,k);
+				if(g[j].no_con[k] == 0){
 				find_least_con(t, A_matrix, nodes, g[j].gr_nodes[k], &best_node, &low_con);
+					if(low_con == INT_MAX)
+						g[j].no_con[k] = 1;
+				}
 			}
 			//printf("best node = %d, low con = %d\n",best_node,low_con);
 			if(best_node != INT_MAX && low_con != INT_MAX){
@@ -72,13 +74,14 @@ void find_smallest_con(node_t t, grupa_g g, int **A_matrix, int nodes, int ngrou
 	}
 }
 
-void assign_groups(node_t t, int **A_matrix, int nodes, int ngroups, double *eigenvector, int centlen, grupa_g g, double **L_matrix, int max_nodes){
+void assign_groups(node_t t, int **A_matrix, int nodes, int ngroups, double *eigenvector, grupa_g g, double **L_matrix, int max_nodes){
 	//double *root_val = malloc(ngroups * sizeof(double)); // wartosci wlasne grup od ktorych zaczynamy przydzial do grup;
 	eigen_centyl(eigenvector, ngroups, nodes, t, g, L_matrix);
 
 	max_nodes--;
 
 	find_smallest_con(t, g, A_matrix ,nodes, ngroups, max_nodes);
+
 
 //	ingr(t,nodes,ngroups,root_val);
 

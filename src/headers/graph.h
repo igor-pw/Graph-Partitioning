@@ -10,8 +10,12 @@ typedef struct node{
 
 typedef struct grupa{
 	int *gr_nodes;
+	int *no_con;
 	int gr_size;
 } * grupa_g;
+
+//void print_results(node_t t, int nodes, int ngroups, int **Macierz_s, int max_nodes, int low_nodes);
+
 /*
 void scan_flags(int argc, char **argc, char *flag_value);
 void divide_graph(double **A_matrix, node_t **nodes, int n);
