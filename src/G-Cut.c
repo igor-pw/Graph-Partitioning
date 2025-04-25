@@ -61,8 +61,6 @@ int main(int argc, char **argv)
 	int **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
 	printf("Macierz Sasiedztwa\n");
 
-	printf("%p\n", t);
-
 	fclose(in);
 
 	int ITERATIONS;
@@ -191,7 +189,7 @@ int main(int argc, char **argv)
 	else if(nodes > 1000 && nodes <= 15000)
 		epsilon_margin = pow(10, -4);
 	else
-		epsilon_margin = pow(10, -2);
+		epsilon_margin = pow(10, -1);
 
 	double *velocity = calloc(nodes, sizeof(double));
 

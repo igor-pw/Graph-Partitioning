@@ -91,6 +91,9 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 
 			start_index = end_index;	
 		}
+
+		else
+			break;
 	}	
 	
 	int y = index[start_index];
