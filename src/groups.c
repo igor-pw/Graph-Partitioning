@@ -25,6 +25,22 @@ void first_con(node_t t, double **Macierz_s, int nodes, int ngroups){
 //!!!!!!!!!	TU JEST COS STROGO NIE TAK
 //POPRAWIE JUTRO™
 
+
+void ad_nb_nodes(node_t *t, double **L_matrix, int nodes){
+	for(int i = 0; i< nodes; i++){
+		t[i]->connected=malloc(L_matrix[i][i] * sizeof(int));
+		t[i]->con_count=L_matrix[i][i];
+		int tmp = 0;
+		for(int j =0; j< nodes; j++){
+			if(L_matrix[i][j] == -1){
+				t[i]->connected[tmp] = j;
+				tmp++;
+			}
+
+		}
+	}
+}
+
 int con_am(node_t *t, int **A_matrix, int nodes, int node){
 	int tmp = 0;
 	for(int i = 0; i < nodes; i++){
@@ -50,7 +66,164 @@ void find_least_con(node_t *t, int **A_matrix, int nodes, int node, int *best_no
 	}
 }
 
+void print_l(que_list *head, int row, int col) {
+    if (head == NULL) {
+        printf("Lista [%d][%d] jest pusta\n", row, col);
+        return;
+    }
+
+    printf("Lista [%d][%d]: ", row, col);
+    que_list *current = head;
+    while (current != NULL) {
+        printf("%d -> ", current->que);
+        current = current->next;
+    }
+    printf("NULL\n");
+
+    printf("Ostatni element: %d\n", head->last->que);
+}
+
+void add_to_end(que_list **head, int con){
+		printf("a\n");
+	que_list *new_node = malloc(sizeof(que_list));
+		printf("b\n");
+		if(new_node == NULL)
+			printf("ojoj\n");
+	new_node->que = con;
+		printf("c\n");
+	new_node->next = NULL;
+		printf("d\n");
+
+	if(*head == NULL){
+		printf("e\n");
+		new_node->last = new_node;
+		printf("f\n");
+		*head = new_node;
+		printf("g\n");
+	}
+	else{
+		que_list *last_node = (*head)->last;
+		if(last_node == NULL){
+			printf("UWAGA!!!\n");
+			last_node = *head;
+			while(last_node->next != NULL)
+				last_node = last_node->next;
+			(*head)->last=last_node;
+		}
+		last_node->next = new_node;
+		(*head)->last = new_node;
+	}
+}
+
+
+void add_to_que(que_list **l_gr, node_t *t, int nodes, int node, int *D_vector){
+	for(int i = 0; i <t[node]->con_count; i++){
+		int ing = t[node]->connected[i];
+		int tmp = D_vector[ing];
+		printf("tmp = %d, ing = %d\n",tmp,ing);
+		add_to_end(&l_gr[tmp],ing);
+	}
+
+}
+
+void rm_first(que_list **head){
+	if(*head == NULL){
+		printf("cos nie tak\n");
+		return;
+	}
+	que_list *first_node = *head;
+	*head = first_node->next;
+	if(*head == NULL){
+	}
+	else if(first_node->last == first_node){
+		(*head)->last=*head;
+	}
+	else{
+		(*head)->last = first_node->last;
+	}
+}
+
+int is_valid(que_list **head, node_t *t, int gr){
+	while(*head != NULL){
+		int tmp = (*head)->que;
+		if(t[tmp]->group ==-1){
+			t[tmp]->group = gr;
+			rm_first(head);
+			return tmp;
+		}
+		rm_first(head);
+	}
+	return -1;
+	
+}
+
+void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int nodes, int gr, int *D_vector){
+	int succes = 0;
+	for(int i = 0; i < g[gr].max_con && succes != 1; i++){
+		if(l_gr[i] != NULL){
+			int node = is_valid(&l_gr[i],t,gr);
+		
+			if(node != -1){
+			add_to_que(l_gr,t,nodes,node,D_vector);
+			t[node]->group = gr;
+			return;		
+			}
+	
+		}
+	}
+}	
+
+void list_gr_con(node_t *t, grupa_g g, int **A_matrix, int nodes, int ngroups, int max_gr_size, int *D_vector, double *eigenvector, double **L_matrix){
+	eigen_centyl(eigenvector, ngroups, nodes, t, g, L_matrix);
+	que_list ***l = malloc(ngroups * sizeof(que_list**));
+	
+	for(int i = 0; i <ngroups; i++){
+		
+		printf("nodes = %d, D = %d\n",g[i].gr_nodes[i],D_vector[0]);
+		int tmp =D_vector[g[i].gr_nodes[0]];
+		tmp = tmp*2;// moze(i tak sie dzieje) ze max polonczen gr 1 jest mniejszy od max 2 gr i npma tam polonczenie z wieszcholkiem o wiekszej ilosci polonczen
+		g[i].max_con=tmp;
+		printf("-----tmp = %d\n",tmp);
+		l[i]=malloc(tmp*sizeof(que_list*));
+		for(int j =0; j<tmp; j++){
+			l[i][j]=NULL;
+		}
+	}
+
+
+	for(int i =0; i <ngroups; i++){
+		
+		add_to_que(l[i],t,nodes,g[i].gr_nodes[0],D_vector);
+	}
+	printf("9\n");
+
+	for(int i =0; i <max_gr_size; i++){
+		for(int j = 0; j <ngroups; j++){
+			add_from_que(l[j],t,g,nodes,j,D_vector);
+		}
+	}
+
+	for (int i = 0; i < ngroups; i++) {
+        	for (int j = 0; j < g[i].max_con; j++) {
+            		if (l[i][j] != NULL) {
+                		print_l(l[i][j], i, j);
+            		}
+        	}
+    	}
+
+	for(int i =0; i <ngroups; i++){
+		printf("gr %d - ",i);
+		for(int j =0; j < t[g[i].gr_nodes[0]]->con_count; j++){
+			printf("%d ,",t[g[i].gr_nodes[0]]->connected[j]);
+		}
+		printf("\n");
+	}
+
+
+}
 void find_smallest_con(node_t *t, grupa_g g, int **A_matrix, int nodes, int ngroups, int max_gr_size){
+	
+
 	for(int i =0; i<max_gr_size; i++){
 		for(int j =0 ; j<ngroups; j++){
 			int best_node = INT_MAX;

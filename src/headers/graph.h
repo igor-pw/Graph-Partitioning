@@ -4,7 +4,7 @@
 
 typedef struct node{
 	int *connected;
-	int nr, x, y, group, index, vle, gain, gr_gain;
+	int nr, x, y, group, index, vle, gain, gr_gain, con_count;
 	double eigenvalue;
 } * node_t;
 
@@ -12,7 +12,14 @@ typedef struct grupa{
 	int *gr_nodes;
 	int *no_con;
 	int gr_size;
+	int max_con;
 } * grupa_g;
+
+typedef struct que_list{
+	int que;
+	struct que_list *next;
+	struct que_list *last;
+} que_list;
 
 void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
 void free_struct_node(node_t *t, int n);

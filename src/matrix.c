@@ -328,7 +328,7 @@ void assing_group(node_t t, int n, int ngr, double *centyle){
 	
 }
 */
-
+/*
 void connections(node_t t, int n, int **A_matrix, int *connections2){
 	int v[n];
 	int count = 0;
@@ -347,7 +347,7 @@ void connections(node_t t, int n, int **A_matrix, int *connections2){
 		count =0;
 	}
 }
-
+*/
 void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes)
 {
 	int dif[ngroups];

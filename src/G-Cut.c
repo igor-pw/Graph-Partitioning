@@ -113,6 +113,9 @@ int main(int argc, char **argv)
 	double **L_matrix = create_L_matrix(A_matrix, D_vector, nodes);
 	printf("Macierz Laplace'a\n");
 
+	printf("Dodanie sasiadow\n");
+	ad_nb_nodes(t,L_matrix,nodes);
+
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_vector, D_norm, nodes);
 	printf("Wektor poczatkowy\n");	
@@ -220,9 +223,11 @@ int main(int argc, char **argv)
 
 	int ngroups = divide;
 	
-	assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
+
+	//assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
 	printf("Przydzielenie grup\n");
 	
+	list_gr_con(t,g,A_matrix,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
 	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
 
 	gain_calculate(t, A_matrix, ngroups, nodes);
