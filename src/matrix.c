@@ -1,4 +1,5 @@
 #include "headers/matrix.h"
+#include "headers/vector.h"
 #include "headers/graph.h"
 #include <ctype.h>
 #define am 153600
@@ -132,6 +133,36 @@ double **create_L_matrix(int **A_matrix, int *D_vector, int n)
 	return L_matrix;
 }
 
+csr_t create_compresed_matrix(double **matrix, int nz, int n)
+{
+	csr_t csr = malloc(sizeof(*csr));	
+	csr->values = malloc(sizeof(double) * nz);
+	csr->col_index = malloc(sizeof(int) * nz);
+	csr->row_ptr = malloc(sizeof(int) * (n+1));
+
+	csr->row_ptr[0] = 0;
+
+	int counter = 0;
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = 0; j < n; j++)
+		{
+			if(matrix[i][j] != 0)
+			{
+				csr->values[counter] = matrix[i][j];
+				csr->col_index[counter] = j;
+				counter++;
+			}
+		}
+			
+		csr->row_ptr[i + 1] = counter;
+	}
+
+	printf("nz: %d\n", counter);
+
+	return csr;
+}
+
 double **create_T_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
 	//dodane do ulatwienia testowania funkcji	
 	double **tri = malloc(sizeof(double*) * k);
@@ -166,10 +197,10 @@ void print_matrix(double **matrix, int n)
 	printf("\nMatrix %dx%d\n\n", n, n);
 }
 
-void calculate_coefs(double **L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k)
+void calculate_coefs(csr_t L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k)
 {
 	//wektor resztowy
-	double *residual_vec = multiply_mtx_by_vec(L_matrix, initial_vec, n);
+	double *residual_vec = multiply_compresed_mtx_by_vec(L_matrix, initial_vec, n);
 
 	//dla i > 0 odejmujemy poprzedni wektor poczatkowy
 	if(i > 0)
@@ -394,9 +425,24 @@ void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes)
 
 void print_gain(node_t *t, int nodes)
 {
-	for(int i =0; i < nodes; i++){
-		printf("wieszcholek %d z grupy %d -> gain group %d gain %d\n",i,t[i]->group,t[i]->gr_gain,t[i]->gain);
+	int counter = 0;
+	for(int i =0; i < nodes; i++)
+	{
+		int x = 0;
+		for(int j = 0; j < t[i]->con_count; j++)
+		{
+			if(t[i]->group == t[t[i]->connected[j]]->group)
+			       x++;	
+		}
+
+		if(t[i]->gain <= 0)
+		{
+			printf("wieszcholek %d z grupy %d krawedzi %d -> gain group %d gain %d\n",i,t[i]->group,x,t[i]->gr_gain,t[i]->gain);
+			counter++;
+		}
 	}
+
+	printf("wierzcholki z ujemnym i dodatnim gainem: %d\n", counter);
 }
 
 void free_matrix(double **matrix, int n)
@@ -415,3 +461,10 @@ void free_int_matrix(int **matrix, int n)
 	free(matrix);
 }
 
+void free_csr(csr_t matrix)
+{
+	free(matrix->values);
+	free(matrix->col_index);
+	free(matrix->row_ptr);
+	free(matrix);	
+}

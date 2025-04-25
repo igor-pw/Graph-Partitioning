@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -ggdb -Wall -Wextra -std=c99 -lm
 TARGET = bin/G-Cut
-TEST = --output wyjscietxt --input data/graf5.csrrg --divide 10 --margin 0.1
+TEST = --output wyjscietxt --input data/graf5.csrrg --divide 100 --margin 0.2
 FILES = src/G-Cut.c src/matrix.c src/vector.c src/input.c src/groups.c src/graph.c
 
 compile: src/G-Cut.c src/matrix.c src/vector.c src/input.c
@@ -12,4 +12,4 @@ valgrind:
 
 execute: 
 	./$(TARGET) $(TEST)
-	
+

@@ -181,7 +181,7 @@ void list_gr_con(node_t *t, grupa_g g, int **A_matrix, int nodes, int ngroups, i
 		
 		printf("nodes = %d, D = %d\n",g[i].gr_nodes[i],D_vector[0]);
 		int tmp =D_vector[g[i].gr_nodes[0]];
-		tmp = tmp*2;// moze(i tak sie dzieje) ze max polonczen gr 1 jest mniejszy od max 2 gr i npma tam polonczenie z wieszcholkiem o wiekszej ilosci polonczen
+		tmp = tmp*20;// moze(i tak sie dzieje) ze max polonczen gr 1 jest mniejszy od max 2 gr i npma tam polonczenie z wieszcholkiem o wiekszej ilosci polonczen
 		g[i].max_con=tmp;
 		printf("-----tmp = %d\n",tmp);
 		l[i]=malloc(tmp*sizeof(que_list*));

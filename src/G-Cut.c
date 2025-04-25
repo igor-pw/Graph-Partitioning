@@ -2,7 +2,7 @@
 #include "headers/graph.h"
 #include "headers/input.h"
 #include "headers/groups.h"
-#include <time.h>
+#include "headers/vector.h"
 
 int main(int argc, char **argv)
 {
@@ -52,8 +52,6 @@ int main(int argc, char **argv)
 	if(n == 0){
 		return 2;
 	}
-	//divide = 117;
-	//margin = 0.01;
 	node_t *t = NULL;
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
@@ -63,16 +61,10 @@ int main(int argc, char **argv)
 
 	fclose(in);
 
-	int ITERATIONS;
+	int ITERATIONS = 50;
 
 	if(nodes <= 50)
 		ITERATIONS = nodes;
-	else if(nodes > 50 && nodes <= 10000)
-		ITERATIONS = 50;
-	else if(nodes > 10000 && nodes <= 25000)
-		ITERATIONS = 40;
-	else
-		ITERATIONS = 30;
 	
 	// ilosc wierzcholkow w grupach
 	int avg_nodes = (int)round((double)nodes/divide); // srednia ilosc wierzcholkow
@@ -101,9 +93,13 @@ int main(int argc, char **argv)
 	printf("Wektor Stopni\n");
 
 	int all_edges = 0;
+	int nz = 0;
 
 	for(int i = 0; i < nodes; i++)
+	{
 		all_edges += D_vector[i];
+		nz += (D_vector[i] + 1);
+	}
 
 	all_edges /= 2;
 
@@ -111,8 +107,8 @@ int main(int argc, char **argv)
 	double **L_matrix = create_L_matrix(A_matrix, D_vector, nodes);
 	printf("Macierz Laplace'a\n");
 
-	printf("Dodanie sasiadow\n");
 	ad_nb_nodes(t,L_matrix,nodes);
+	printf("Dodanie sasiadow\n");
 
 	//wektor poczatkowy	
 	double *initial_vec = create_initial_vec(D_vector, D_norm, nodes);
@@ -125,11 +121,14 @@ int main(int argc, char **argv)
 	double *alfa_coefs = calloc(nodes, sizeof(double));
 	double *beta_coefs = calloc(nodes, sizeof(double));
 
+	csr_t compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
+	
 	//obliczenie wspolczynnikow alfa i beta
-	calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
+	calculate_coefs(compresed_L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
 	printf("Wspolczynniki alfa i beta\n");
 
 	free(prev_initial_vec);
+	free_csr(compresed_L_matrix);
 
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
 	double **T_matrix = create_T_matrix(alfa_coefs, beta_coefs, ITERATIONS);
@@ -172,24 +171,15 @@ int main(int argc, char **argv)
 	for(int i = 0; i < nodes; i++)
 		L_matrix[i][i] -= eigenvalue;	
 
+	compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
+	
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
-	if(nodes >= 200)
-		learning_rate = 0.01;
+	double epsilon_margin = pow(10, -15);
 
-	double epsilon_margin;
-
-	if(nodes <= 200)
-		epsilon_margin = pow(10, -12);
-	else if(nodes > 200 && nodes <= 500)
-		epsilon_margin = pow(10, -8);
-	else if(nodes > 500 && nodes <= 1000)
-		epsilon_margin = pow(10, -6);
-	else if(nodes > 1000 && nodes <= 15000)
-		epsilon_margin = pow(10, -4);
-	else
-		epsilon_margin = pow(10, -1);
+	if(nodes > 5000)
+	       epsilon_margin = pow(10, -5);
 
 	double *velocity = calloc(nodes, sizeof(double));
 
@@ -199,11 +189,12 @@ int main(int argc, char **argv)
 	//wektor wlasny
 	do
 	{
-		eigenvector = calculate_eigenvector(initial_vec, L_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin, &epsilon);
+		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compresed_L_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin, &epsilon);
 	
 	} while(epsilon > epsilon_margin);
 
 	free(velocity);
+	free_csr(compresed_L_matrix);
 
 	//cofniecie zmian w macierzy Laplace'a
 	for(int i = 0; i < nodes; i++)
@@ -229,7 +220,7 @@ int main(int argc, char **argv)
 	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
 
 	gain_calculate(t, A_matrix, ngroups, nodes);
-	//print_gain(t, nodes);
+	print_gain(t, nodes);
 
 	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
 	free_int_matrix(A_matrix, nodes);

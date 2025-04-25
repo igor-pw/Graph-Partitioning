@@ -39,7 +39,8 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_no
 
 	}
 
-
+	int group_margin = 0;
+	
 	printf("ilosc wszystkich wierzcholkow: %d\n", nodes);
 	for(int i = 0; i < ngroups; i ++){
 		int countgr = 0;
@@ -50,10 +51,16 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_no
 		}
 		printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 		if(countgr <low_nodes || countgr > max_nodes)
+		{
+			group_margin++;
 			printf(" <---- grupa niezgonda z marginesem!!!!\n");
+		}
 		else
 			printf("\n");
 	}
+
+	printf("ilosc grup niezgodnych z marginesem: %d\n", group_margin);
+
 	int wolne_wieszcholki = 0;
 	for(int i =0; i< nodes; i++){
 		if(t[i]->group == -1)

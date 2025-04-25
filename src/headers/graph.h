@@ -2,6 +2,13 @@
 #define _GRAPH_H_
 #include "matrix.h"
 
+typedef struct csr
+{
+	double *values;
+	int *col_index;
+	int *row_ptr;
+} *csr_t;
+
 typedef struct node{
 	int *connected;
 	int nr, x, y, group, index, vle, gain, gr_gain, con_count;

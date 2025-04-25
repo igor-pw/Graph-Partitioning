@@ -1,3 +1,4 @@
+//#include "headers/matrix.h"
 #include "headers/vector.h"
 
 static int depth = 0;
@@ -61,9 +62,28 @@ double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
         {
                 for(int j = 0; j < n; j++)
                         result_vec[i] += matrix[i][j]*vec[j];
-        }
+        
+		//printf("vector: %g\n", result_vec[i]);
+	}
 
         return result_vec;
+}
+
+double *multiply_compresed_mtx_by_vec(csr_t csr, double *vec, int n)
+{
+	double *result_vec = calloc(n, sizeof(double));
+		
+	for(int i = 0; i < n; i++)
+	{
+		for(int j = csr->row_ptr[i]; j < csr->row_ptr[i+1]; j++)
+		{
+			result_vec[i] += csr->values[j]*vec[csr->col_index[j]]; 	
+		}
+
+		//printf("halo: %g\n", result_vec[i]);
+	}
+
+	return result_vec;
 }
 
 double multiply_vec_by_vec(double *vec, double *vecT, int n)
@@ -123,11 +143,17 @@ double find_smallest_eigenvalue(double *vec, int n)
 	return eigenvalue;
 }
 
-double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon)
+double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon)
 {
 	//nowa wersja
-	double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
-	double *gradient = multiply_mtx_by_vec(gradient_matrix, r_vec, n);
+	//double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
+	double *r_vec = multiply_compresed_mtx_by_vec(matrix, vec, n);
+	
+	/*for(int i = 0; i < n; i++)
+		if(r_vec[i] != test_vec[i])
+			printf("nie dziala\n");
+	*/
+	double *gradient = multiply_compresed_mtx_by_vec(matrix, r_vec, n);
 
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;
@@ -139,7 +165,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 	{
 		velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i];
 		vec[i] -= learning_rate*velocity[i];
-		vec_norm += pow(vec[i], 2);
+		vec_norm += vec[i]*vec[i];
 	}
 
 	vec_norm = sqrt(vec_norm);
@@ -160,7 +186,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, int n, doub
 	depth++;
 	if(*epsilon > epsilon_margin && depth < 10000)
 	{	
-		vec = calculate_eigenvector(vec, gradient_matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon);
+		vec = calculate_eigenvector(vec, gradient_matrix, matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon);
 	}
 
 	if(depth >= 10000)
