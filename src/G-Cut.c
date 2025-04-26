@@ -3,6 +3,7 @@
 #include "headers/input.h"
 #include "headers/groups.h"
 #include "headers/vector.h"
+#include "headers/structs.h"
 
 int main(int argc, char **argv)
 {
@@ -36,12 +37,16 @@ int main(int argc, char **argv)
 		argv_index += 2;
 	}
 
-	printf("%d, %g, %s, %s\n", divide, margin, input_name, output_name);
-
 	if(input_name == NULL)
 		return 1;
 		
 	FILE *in = fopen(input_name, "r");
+
+	if(in == NULL)
+	{
+		printf("Nieprawidlowa nazwa pliku\n");
+		return 2;
+	}
 
 	int n = 0;
 	int nodes = 0;
@@ -49,9 +54,9 @@ int main(int argc, char **argv)
 	int connections1 =0;
 	fscanf(in, "%d\n", &n);
 	
-	if(n == 0){
-		return 2;
-	}
+	if(n == 0)
+		return 3;
+
 	node_t *t = NULL;
 	grupa_g g = malloc(divide * sizeof(struct grupa));
 	
@@ -67,13 +72,12 @@ int main(int argc, char **argv)
 		ITERATIONS = nodes;
 	
 	// ilosc wierzcholkow w grupach
-	int avg_nodes = (int)round((double)nodes/divide); // srednia ilosc wierzcholkow
 	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); // to ile moze byc max w grupie z marginesem
 	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); // to ile moze byc najmniej w grupie z marginesem
 	// zrobilem to w to bo np avg moze byc 1.4 i jak zaokrogle to margines moze sie rozjechac
 
 	//cos tu nie gra bo dla marginesu 1% max jest mniejszy od low
-	printf("nodes: %d, avg: %d, max: %d, low: %d, avg*nodes: %d\n", nodes, avg_nodes, max_nodes, low_nodes, avg_nodes*divide);
+	printf("nodes: %d, max: %d, low: %d\n", nodes, max_nodes, low_nodes);
 
 	//noi ten warunek nie wiem dlaczego tez nie dziala bo przechodzi dla 105 < 102 co nie jest prawda
 	if(max_nodes*divide < nodes){		
@@ -161,10 +165,8 @@ int main(int argc, char **argv)
 
 	//szukana wartosc wlasna
 	double eigenvalue = find_smallest_eigenvalue(eigenvalues_vec, ITERATIONS);
-	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n\n");
+	printf("Najmniejsza wartosc wlasna macierzy Laplace'a\n");
 
-	printf("eigenvalue: %g\n", eigenvalue);
-	
 	free(eigenvalues_vec);
 
 	//tymczasowe przeksztalcenie macierzy Laplace'a w macierz Gradientu
@@ -176,7 +178,7 @@ int main(int argc, char **argv)
 	double learning_rate = 0.001;
 	double momentum = 0.8;
 
-	double epsilon_margin = pow(10, -15);
+	double epsilon_margin = pow(10, -12);
 
 	if(nodes > 5000)
 	       epsilon_margin = pow(10, -5);
@@ -184,27 +186,25 @@ int main(int argc, char **argv)
 	double *velocity = calloc(nodes, sizeof(double));
 
 	double epsilon = 0.0;
+	double prev_epsilon = 0.0;
 	double *eigenvector = NULL;
 
 	//wektor wlasny
 	do
 	{
-		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compresed_L_matrix, nodes, learning_rate, momentum, velocity, epsilon_margin, &epsilon);
+		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compresed_L_matrix, nodes, learning_rate, momentum, velocity, &epsilon_margin, &epsilon, &prev_epsilon);
 	
 	} while(epsilon > epsilon_margin);
 
 	free(velocity);
 	free_csr(compresed_L_matrix);
+	printf("Wektor wlasny\n");
 
 	//cofniecie zmian w macierzy Laplace'a
 	for(int i = 0; i < nodes; i++)
 		L_matrix[i][i] += eigenvalue;	
 
-	printf("epsilon: %g\n", epsilon);
-	printf("Wektor wlasny\n");
-	
 	assing_eigen(t, eigenvector,nodes);
-
 	printf("Przydzielenie wartosci wektora wlasnego\n");
 
 	//sortujemy wektor wlasny
@@ -212,39 +212,32 @@ int main(int argc, char **argv)
 
 	int ngroups = divide;
 	
-
 	//assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
-	printf("Przydzielenie grup\n");
 	
-	list_gr_con(t,g,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
-
-	printf("Liscie: \n");
-	for(int i = 0; i < nodes; i++)
-	{
-		if(t[i]->is_leaf)
-			printf("wierzcholek: %d\n", t[i]->nr);
-
-	}
+	list_gr_con(t,g,nodes,ngroups,max_nodes,low_nodes,D_vector,eigenvector,L_matrix);	
+	printf("Przydzielenie grup\n");
 
 	gain_calculate(t, ngroups, nodes);
+	printf("Obliczenie korzysci dla rafinacji\n");
 
-	/*for(int i = 0; i < 50; i++)
-	{
-		find_leaves(t, nodes);
-		repair_margin(t, nodes, g, divide, max_nodes, low_nodes);
-		gain_calculate(t, ngroups, nodes);
-	}*/
 	for(int i = 0; i < 10; i++)	
 	{
 		find_leaves(t, nodes);
-		move_nodes_with_negative_gain(t, nodes, g, max_nodes, low_nodes);
+		refine_groups(t, nodes, g, max_nodes, low_nodes);
 		gain_calculate(t, ngroups, nodes);
 	}
+	printf("Rafinacja grup\n");
+
+	bool in_margin = is_in_margin(g, divide, low_nodes, max_nodes);
+
+	if(in_margin)
+		print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges, output_name);	
 	
-	print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
-	print_gain(t, nodes);
-	printf("finito\n");
-	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
+	else
+		printf("\nPodzial grafu zakonczyl sie niepowodzeniem. Zwieksz margines bledu lub zmniejsz ilosc grup\n");
+	//print_gain(t, nodes);
+	//printf("finito\n");
+	//zwolnienie pamieci
 	free_int_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
@@ -256,6 +249,9 @@ int main(int argc, char **argv)
 	
 	free_struct_node(t, nodes);
 	free(g);
+
+	if(!in_margin)
+		return 4;
 
 	return 0;
 }

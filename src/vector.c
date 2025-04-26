@@ -143,7 +143,7 @@ double find_smallest_eigenvalue(double *vec, int n)
 	return eigenvalue;
 }
 
-double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon)
+double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
 {
 	//nowa wersja
 	//double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
@@ -184,9 +184,19 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matri
 	free(gradient);
 
 	depth++;
-	if(*epsilon > epsilon_margin && depth < 10000)
+	
+	if(*epsilon < pow(10, -3) && *epsilon >= *prev_epsilon)
+	{
+		printf("KONIEC\n");
+		*epsilon_margin = pow(10, -3);
+		return vec;
+	}
+
+	*prev_epsilon = *epsilon;
+
+	if(*epsilon > *epsilon_margin && depth < 10000)
 	{	
-		vec = calculate_eigenvector(vec, gradient_matrix, matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon);
+		vec = calculate_eigenvector(vec, gradient_matrix, matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon, prev_epsilon);
 	}
 
 	if(depth >= 10000)
@@ -247,7 +257,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 		g[i-1].gr_size =1;
 		t[node]->group = i-1;
 		
-		printf("Najwiecej polonczen w gr %d ma wieszcholek %d -> %d\t przedzial - %.15lf, %.15lf  wartosc - %.15lf\n", i-1, g[i-1].gr_nodes[0], max_len, pj,pk,xd);
+		//printf("Najwiecej polonczen w gr %d ma wieszcholek %d -> %d\t przedzial - %.15lf, %.15lf  wartosc - %.15lf\n", i-1, g[i-1].gr_nodes[0], max_len, pj,pk,xd);
 		free(eigen_tmp);
 		free(node_gr);
 		}

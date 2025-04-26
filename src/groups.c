@@ -108,22 +108,15 @@ void print_l(que_list *head, int row, int col) {
 }
 
 void add_to_end(que_list **head, int con){
-		printf("a\n");
 	que_list *new_node = malloc(sizeof(que_list));
-		printf("b\n");
 		if(new_node == NULL)
 			printf("ojoj\n");
 	new_node->que = con;
-		printf("c\n");
 	new_node->next = NULL;
-		printf("d\n");
 
 	if(*head == NULL){
-		printf("e\n");
 		new_node->last = new_node;
-		printf("f\n");
 		*head = new_node;
-		printf("g\n");
 	}
 	else{
 		que_list *last_node = (*head)->last;
@@ -144,7 +137,7 @@ void add_to_que(que_list **l_gr, node_t *t, int node, int *D_vector){
 	for(int i = 0; i <t[node]->con_count; i++){
 		int ing = t[node]->connected[i];
 		int tmp = D_vector[ing];
-		printf("tmp = %d, ing = %d\n",tmp,ing);
+		//printf("tmp = %d, ing = %d\n",tmp,ing);
 		add_to_end(&l_gr[tmp],ing);
 	}
 
@@ -210,7 +203,7 @@ void con_free_nodes(node_t *t, grupa_g g ,int nodes, int max){
 				for(int j =0; j< t[i]->con_count; j++){
 					int node = t[i]->connected[j];
 					int gr = t[node]->group;
-					if(gr != -1 && g[gr].gr_size < smallest_gr){ //&& g[gr].gr_size < max){
+					if(gr != -1 && g[gr].gr_size < smallest_gr){ 
 						smallest_gr = g[gr].gr_size;
 					gr_to = gr;
 					}
@@ -227,7 +220,7 @@ void con_free_nodes(node_t *t, grupa_g g ,int nodes, int max){
 	
 }
 
-void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, int *D_vector, double *eigenvector, double **L_matrix){
+void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, int min_gr_size, int *D_vector, double *eigenvector, double **L_matrix){
 	eigen_centyl(eigenvector, ngroups, nodes, t, g, L_matrix);
 	que_list ***l = malloc(ngroups * sizeof(que_list**));
 	int tmp = -1;
@@ -238,7 +231,7 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 	tmp++; // bo nie ma 0 polonczen wiec zaczynamy od 1 
 	for(int i = 0; i <ngroups; i++){
 		
-		printf("nodes = %d, D = %d\n",g[i].gr_nodes[i],D_vector[0]);
+		//printf("nodes = %d, D = %d\n",g[i].gr_nodes[i],D_vector[0]);
 		g[i].max_con=tmp;
 		l[i]=malloc(tmp*sizeof(que_list*));
 		for(int j =0; j<tmp; j++){
@@ -252,30 +245,27 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 		add_to_que(l[i],t,g[i].gr_nodes[0],D_vector);
 	}
 
-	for(int i =0; i < max_gr_size/2; i++){
-		for(int j = 0; j <ngroups; j++){
-			add_from_que(l[j],t,g,j,D_vector);
-			add_from_que(l[j],t,g,j,D_vector);
-		}
-	}
+	for(int i =0; i < max_gr_size; i++)
+		for(int j = 0; j <ngroups; j++)
+				add_from_que(l[j],t,g,j,D_vector);	
 	
-	//con_free_nodes(t,g,nodes, max_gr_size);
+	con_free_nodes(t,g,nodes, max_gr_size);
 
 	for (int i = 0; i < ngroups; i++) {
         	for (int j = 0; j < g[i].max_con; j++) {
             		if (l[i][j] != NULL) {
-                		print_l(l[i][j], i, j);
+                		//print_l(l[i][j], i, j);
             		}
         	}
     	}
 
-	for(int i =0; i <ngroups; i++){
+	/*for(int i =0; i <ngroups; i++){
 		printf("gr %d - ",i);
 		for(int j =0; j < t[g[i].gr_nodes[0]]->con_count; j++){
 			printf("%d ,",t[g[i].gr_nodes[0]]->connected[j]);
 		}
 		printf("\n");
-	}
+	}*/
 	//t[g[0].gr_nodes[1]]->group=-1;
 
 
@@ -321,7 +311,7 @@ void assign_groups(node_t *t, int **A_matrix, int nodes, int ngroups, double *ei
 
 }
 
-void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, int min)
+void refine_groups(node_t *node, int n, grupa_g group, int max, int min)
 {
 	for(int i = 0; i < n; i++)
 	{
@@ -329,38 +319,25 @@ void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, 
 		{
 			int group_gain = node[i]->gr_gain;
 
-			if(group[group_gain].gr_size < max) 
+			if(group[group_gain].gr_size < max && group_gain >= 0) 
 			{
-
 				group[node[i]->group].gr_size--;
 				node[i]->group = node[i]->gr_gain;
-				group[group_gain].gr_nodes[group[group_gain].gr_size] = node[i]->nr;
+				node[i]->gr_gain = -1;
 				group[group_gain].gr_size++;	
 			}
 		}
 	}
 }
 
-void repair_margin(node_t *node, int n, grupa_g group, int divide, int max, int min)
+bool is_in_margin(grupa_g group, int n, int min, int max)
 {
-	for(int i = 0; i < divide; i++)
+	for(int i = 0; i < n; i++)
 	{
-		if(group[i].gr_size < min)
-		{
-			for(int j = 0; j < n; j++)
-			{
-				int group_gain = node[i]->gr_gain;	
-				if(node[j]->gr_gain == i && node[j]->is_leaf && group[node[j]->group].gr_size > min) 
-				{
-					//printf("przerzucono wierzcholek %d\n", node[j]->
-
-					group[node[j]->group].gr_size--;
-					node[j]->group = node[j]->gr_gain;
-                                	group[group_gain].gr_nodes[group[group_gain].gr_size] = node[j]->nr;
-                                	group[group_gain].gr_size++;
-				}
-			}
-		}
+		if(group[i].gr_size < min || group[i].gr_size > max)
+			return false;
 	}
+
+	return true;
 
 }

@@ -44,6 +44,7 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 					(*t)[c2]->index = c2;
 					(*t)[c2]->eigenvalue = 0.0;
 					(*t)[c2]->is_leaf = false;
+					(*t)[c2]->visited = false;
 					c2++;
 				}
 
@@ -158,8 +159,6 @@ csr_t create_compresed_matrix(double **matrix, int nz, int n)
 			
 		csr->row_ptr[i + 1] = counter;
 	}
-
-	printf("nz: %d\n", counter);
 
 	return csr;
 }
@@ -437,7 +436,7 @@ void print_gain(node_t *t, int nodes)
 			       x++;	
 		}
 
-		if(t[i]->gain < 0)
+		if(t[i]->gain < 0 && x <= 1)
 		{
 			printf("wieszcholek %d z grupy %d krawedzi %d -> gain group %d gain %d\n",i,t[i]->group,x,t[i]->gr_gain,t[i]->gain);
 			counter++;

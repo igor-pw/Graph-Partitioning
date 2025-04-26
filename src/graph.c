@@ -1,47 +1,50 @@
 #include "headers/matrix.h"
 #include "headers/graph.h"
 
-void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges)
+void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges, char *file_name)
 {	
+	FILE *out = fopen(file_name, "w");
+
 	int lu = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(lu < nodes && (t[lu]->y == i && t[lu]->x == j)){
-				printf("1 ");
+				fprintf(out, "1 ");
 				lu++;
 			}
 			else
-				printf("0 ");
-
-			printf("%d\n", lu);
+				fprintf(out, "0 ");
 		}
+		fprintf(out, "\n");
 	}
+	fprintf(out, "\n");
+	
 
-	printf("wypisywanie macierzy\n");
+	printf("Zapisanie podzielonego grafu do pliku\n");
 
 	int edges = 0;
 
 		printf("\n");
 	for(int k = 0; k <ngroups; k++){
-		printf("grupa %d\n", k);
+		fprintf(out, "grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
 			if( t[i]->group == k){
 					for(int j = i; j < nodes; j++){
 						if(t[j]->group == k && A_matrix[i][j] == 1)
 						{
 							edges++;
-							printf("%d-%d\n",i,j);
+							fprintf(out, "%d-%d\n",i,j);
 						}
 					}
 			}
 		}
-		printf("\n");
+		fprintf(out, "\n");
 
 	}
 
 	int group_margin = 0;
 	int *gr_nodes = malloc(ngroups*sizeof(int));
-	printf("ilosc wszystkich wierzcholkow: %d\n", nodes);
+	//printf("ilosc wszystkich wierzcholkow: %d\n", nodes);
 	for(int i = 0; i < ngroups; i ++){
 		int countgr = 0;
 		for(int j = 0; j < nodes; j ++){
@@ -67,6 +70,8 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 		}
 	//	printf("ilosc wieszcholkow w gr.%d = %d, a z dfs = %d\ \n",i,gr_nodes[i],dfs_check[i]);
 	}
+
+	printf("Rezultaty:\n");
 
 	printf("ilosc grup niezgodnych z marginesem: %d\n", group_margin);
 
@@ -100,6 +105,28 @@ void find_leaves(node_t *node, int n)
 			node[i]->is_leaf = true;	
 	}
 }
+
+/*void cut_dfs(node_t *node, grupa_g group, int group_nr, int index, int cut_target, int *cut_index, int counter)
+{
+	int next_index = -1;
+
+	if(!node[index]->visited && node[index]->group == group_nr)
+		next_index = node[index]->connected[0];
+
+	for(int i = 0; i < node[index]->con_count; i++)
+	{
+		if(!node[index]->visited && node[index]->group == node[node[index]->connected[i]]->group && node[index]->con_count > node[node[index]->connected[i]]->con_count)
+			next_index = node[node[index]->connected[i]]->nr;
+	}
+				
+	cut_index[counter] = next_index;
+	node[index]->visited = true;
+	printf("ilosc krawedzi w badanych wierzcholku: %d\n", node[next_index]->con_count);
+	counter++;
+
+	if(counter < cut_target)
+		cut_dfs(node, group, group_nr, next_index, cut_target, cut_index, counter);	
+}*/
 
 void free_struct_node(node_t *t, int n)
 {

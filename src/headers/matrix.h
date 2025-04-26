@@ -1,14 +1,15 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-#include "vector.h"
-#include "graph.h"
-#include "groups.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "vector.h"
+#include "graph.h"
+#include "groups.h"
+#include "structs.h"
 
 int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1);
 double **create_L_matrix(int **A_matrix, int *D_vector, int n);
@@ -29,6 +30,5 @@ void print_gain(node_t *t, int nodes);
 void free_matrix(double **matrix, int n);
 void free_int_matrix(int **matrix, int n);
 void free_csr(csr_t matrix);
-//void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "matrix.h"
 #include "graph.h"
+#include "structs.h"
 
 int *create_D_vector(int **A_matrix, int n, int *D_norm);
 double vec_norm(double *vec, int n);
@@ -16,7 +17,7 @@ void subtract_vec(double *vec, double *coef_vec, double coef, int n);
 void divide_vec(double *vec, double coef, int n);
 void copy_vec(double *src_vec, double *dest_vec, int n);
 double find_smallest_eigenvalue(double *vec, int n);
-double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double epsilon_margin, double *epsilon);
+double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon);
 void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix);
 int compare(const void *a, const void *b);
 
