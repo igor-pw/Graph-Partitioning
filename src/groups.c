@@ -44,7 +44,14 @@ int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes){
 		for(int j = 0; j< nodes; j++){
 			hbs[j] = 0;
 		}
-		res[i]=dfs(t,g[i].gr_nodes[0],i,hbs);
+		int node = -1;
+		for(int j=0; j < g[i].gr_size && node == -1; j++){
+			if(t[g[i].gr_nodes[j]]->group == i){
+				node = g[i].gr_nodes[j];
+			}
+		}
+
+		res[i]=dfs(t,node,i,hbs);
 	}
 	free(hbs);
 	return res;

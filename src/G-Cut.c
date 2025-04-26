@@ -228,12 +228,12 @@ int main(int argc, char **argv)
 
 	gain_calculate(t, ngroups, nodes);
 
-	/*for(int i = 0; i < 50; i++)
+	for(int i = 0; i < 50; i++)
 	{
 		find_leaves(t, nodes);
 		repair_margin(t, nodes, g, divide, max_nodes, low_nodes);
 		gain_calculate(t, ngroups, nodes);
-	}*/
+	}
 	for(int i = 0; i < 10; i++)	
 	{
 		find_leaves(t, nodes);
