@@ -217,9 +217,25 @@ int main(int argc, char **argv)
 	printf("Przydzielenie grup\n");
 	
 	list_gr_con(t,g,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
-	print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
+
+	printf("Liscie: \n");
+	for(int i = 0; i < nodes; i++)
+	{
+		if(t[i]->is_leaf)
+			printf("wierzcholek: %d\n", t[i]->nr);
+
+	}
 
 	gain_calculate(t, ngroups, nodes);
+
+	for(int i = 0; i < 10; i++)	
+	{
+		find_leaves(t, nodes);
+		move_nodes_with_negative_gain(t, nodes, g, max_nodes, low_nodes);
+		gain_calculate(t, ngroups, nodes);
+	}
+	
+	print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
 	//print_gain(t, nodes);
 	printf("finito\n");
 	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)

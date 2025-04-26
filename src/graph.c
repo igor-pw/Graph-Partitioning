@@ -84,6 +84,23 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 	free(dfs_check);
 }
 
+void find_leaves(node_t *node, int n)
+{
+	for(int i = 0; i < n; i++)
+	{
+		int counter = 0;
+		
+		for(int j = 0; j < node[i]->con_count; j++)
+		{
+			if(node[node[i]->connected[j]]->group == node[i]->group)
+				counter++;
+		}
+
+		if(counter == 1)
+			node[i]->is_leaf = true;	
+	}
+}
+
 void free_struct_node(node_t *t, int n)
 {
 	for(int i = 0; i < n; i++)

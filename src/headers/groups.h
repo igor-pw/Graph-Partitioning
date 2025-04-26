@@ -19,5 +19,6 @@ void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector);
 int dfs(node_t *t, int node, int gr, int *hbs);
 int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes);
 void con_free_nodes(node_t *t, grupa_g g ,int nodes);
+void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, int min);
 #endif
 

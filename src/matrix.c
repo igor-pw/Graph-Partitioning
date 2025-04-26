@@ -43,6 +43,7 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 					(*t)[c2]->nr = c2;
 					(*t)[c2]->index = c2;
 					(*t)[c2]->eigenvalue = 0.0;
+					(*t)[c2]->is_leaf = false;
 					c2++;
 				}
 

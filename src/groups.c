@@ -319,3 +319,22 @@ void assign_groups(node_t *t, int **A_matrix, int nodes, int ngroups, double *ei
 //	first_con();
 
 }
+
+void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, int min)
+{
+	for(int i = 0; i < n; i++)
+	{
+		if(node[i]->is_leaf && node[i]->gain < 0 && group[node[i]->group].gr_size > min)
+		{
+			int group_gain = node[i]->gr_gain;
+
+			if(group[group_gain].gr_size < max) 
+			{
+				printf("wierzcholek %d mozna przeniesc\n", node[i]->nr);
+				node[i]->group = node[i]->gr_gain;
+				group[group_gain].gr_nodes[group[group_gain].gr_size] = node[i]->nr;
+				group[group_gain].gr_size++;	
+			}
+		}
+	}
+}
