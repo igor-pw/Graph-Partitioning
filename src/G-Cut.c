@@ -216,12 +216,12 @@ int main(int argc, char **argv)
 	//assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
 	printf("Przydzielenie grup\n");
 	
-	list_gr_con(t,g,A_matrix,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
-	print_results(t,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
+	list_gr_con(t,g,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
+	print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
 
-	gain_calculate(t, A_matrix, ngroups, nodes);
-	print_gain(t, nodes);
-
+	gain_calculate(t, ngroups, nodes);
+	//print_gain(t, nodes);
+	printf("finito\n");
 	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
 	free_int_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);

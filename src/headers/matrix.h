@@ -3,6 +3,7 @@
 
 #include "vector.h"
 #include "graph.h"
+#include "groups.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -23,7 +24,7 @@ void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
 void assing_eigen(node_t *t, double *eigenvector, int n);
 //void connections(node_t t, int n, int **A_matrix, int *connections2);
-void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes);
+void gain_calculate(node_t *t, int ngroups, int nodes);
 void print_gain(node_t *t, int nodes);
 void free_matrix(double **matrix, int n);
 void free_int_matrix(int **matrix, int n);

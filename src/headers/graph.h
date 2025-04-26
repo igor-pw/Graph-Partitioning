@@ -28,7 +28,7 @@ typedef struct que_list{
 	struct que_list *last;
 } que_list;
 
-void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
+void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, int max_nodes, int low_nodes, int n, int all_edges);
 void free_struct_node(node_t *t, int n);
 
 #endif

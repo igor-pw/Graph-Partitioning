@@ -382,7 +382,7 @@ void connections(node_t t, int n, int **A_matrix, int *connections2){
 	}
 }
 */
-void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes)
+void gain_calculate(node_t *t, int ngroups, int nodes)
 {
 	int dif[ngroups];
 	
@@ -391,16 +391,17 @@ void gain_calculate(node_t *t, int **A_matrix, int ngroups, int nodes)
 		int cur_node_gr = t[i]->group;
 		for(int j = 0; j < ngroups; j++)
 			dif[j] = 0;
-
-		for(int j = 0; j < nodes; j++)
-			if(A_matrix[i][j] == 1) dif[t[j]->group]++;	
 		
+		for(int j =0; j <t[i]->con_count; j++)
+			dif[t[t[i]->connected[j]]->group]++;
+
 		int min = INT_MAX;
 		int gr = -1;
 		for(int j = 0; j < ngroups; j++)
 		{
 			if( dif[j] != 0 )
 			{
+				//printf("cur_node_gr = %d, j = %d, ngroups = %d, i =%d, t[i]->group = %d\n",cur_node_gr,j,ngroups,i,t[i]->group);
 				int tmp = dif[cur_node_gr] - dif[j];
 				
 				if(tmp < min)
