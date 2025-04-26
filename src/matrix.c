@@ -428,7 +428,7 @@ void gain_calculate(node_t *t, int ngroups, int nodes)
 void print_gain(node_t *t, int nodes)
 {
 	int counter = 0;
-	for(int i =0; i < nodes; i++)
+	for(int i = 0; i < nodes; i++)
 	{
 		int x = 0;
 		for(int j = 0; j < t[i]->con_count; j++)
@@ -437,7 +437,7 @@ void print_gain(node_t *t, int nodes)
 			       x++;	
 		}
 
-		if(t[i]->gain <= 0)
+		if(t[i]->gain < 0)
 		{
 			printf("wieszcholek %d z grupy %d krawedzi %d -> gain group %d gain %d\n",i,t[i]->group,x,t[i]->gr_gain,t[i]->gain);
 			counter++;

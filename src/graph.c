@@ -50,14 +50,14 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 			}
 		}
 		gr_nodes[i]=countgr;
-		printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 		if(countgr <low_nodes || countgr > max_nodes)
 		{
 			group_margin++;
+			printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 			printf(" <---- grupa niezgonda z marginesem!!!!\n");
 		}
-		else
-			printf("\n");
+		//else
+		//	printf("\n");
 	}
 
 	int *dfs_check = check_gr_con(t,g,ngroups,nodes);

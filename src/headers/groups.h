@@ -18,7 +18,8 @@ int is_valid(que_list **head, node_t *t, int gr);
 void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector);
 int dfs(node_t *t, int node, int gr, int *hbs);
 int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes);
-void con_free_nodes(node_t *t, grupa_g g ,int nodes);
+void con_free_nodes(node_t *t, grupa_g g ,int nodes, int max);
 void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, int min);
+void repair_margin(node_t *node, int n, grupa_g group, int divide, int max, int min);
 #endif
 

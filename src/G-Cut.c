@@ -228,6 +228,12 @@ int main(int argc, char **argv)
 
 	gain_calculate(t, ngroups, nodes);
 
+	/*for(int i = 0; i < 50; i++)
+	{
+		find_leaves(t, nodes);
+		repair_margin(t, nodes, g, divide, max_nodes, low_nodes);
+		gain_calculate(t, ngroups, nodes);
+	}*/
 	for(int i = 0; i < 10; i++)	
 	{
 		find_leaves(t, nodes);
@@ -236,7 +242,7 @@ int main(int argc, char **argv)
 	}
 	
 	print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges);	
-	//print_gain(t, nodes);
+	print_gain(t, nodes);
 	printf("finito\n");
 	//zwalnianie pamieci (niektore mozna zwolnic wczesniej)
 	free_int_matrix(A_matrix, nodes);

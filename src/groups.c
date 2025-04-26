@@ -199,7 +199,7 @@ void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector){
 	}
 }
 
-void con_free_nodes(node_t *t, grupa_g g ,int nodes){
+void con_free_nodes(node_t *t, grupa_g g ,int nodes, int max){
 	int fixed =0;
 	while(fixed != 1){
 		fixed = 1;
@@ -210,7 +210,7 @@ void con_free_nodes(node_t *t, grupa_g g ,int nodes){
 				for(int j =0; j< t[i]->con_count; j++){
 					int node = t[i]->connected[j];
 					int gr = t[node]->group;
-					if(gr != -1 && g[gr].gr_size < smallest_gr){
+					if(gr != -1 && g[gr].gr_size < smallest_gr){ //&& g[gr].gr_size < max){
 						smallest_gr = g[gr].gr_size;
 					gr_to = gr;
 					}
@@ -252,13 +252,14 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 		add_to_que(l[i],t,g[i].gr_nodes[0],D_vector);
 	}
 
-	for(int i =0; i <max_gr_size; i++){
+	for(int i =0; i < max_gr_size/2; i++){
 		for(int j = 0; j <ngroups; j++){
+			add_from_que(l[j],t,g,j,D_vector);
 			add_from_que(l[j],t,g,j,D_vector);
 		}
 	}
 	
-	con_free_nodes(t,g,nodes);
+	//con_free_nodes(t,g,nodes, max_gr_size);
 
 	for (int i = 0; i < ngroups; i++) {
         	for (int j = 0; j < g[i].max_con; j++) {
@@ -330,11 +331,36 @@ void move_nodes_with_negative_gain(node_t *node, int n, grupa_g group, int max, 
 
 			if(group[group_gain].gr_size < max) 
 			{
-				printf("wierzcholek %d mozna przeniesc\n", node[i]->nr);
+
+				group[node[i]->group].gr_size--;
 				node[i]->group = node[i]->gr_gain;
 				group[group_gain].gr_nodes[group[group_gain].gr_size] = node[i]->nr;
 				group[group_gain].gr_size++;	
 			}
 		}
 	}
+}
+
+void repair_margin(node_t *node, int n, grupa_g group, int divide, int max, int min)
+{
+	for(int i = 0; i < divide; i++)
+	{
+		if(group[i].gr_size < min)
+		{
+			for(int j = 0; j < n; j++)
+			{
+				int group_gain = node[i]->gr_gain;	
+				if(node[j]->gr_gain == i && node[j]->is_leaf && group[node[j]->group].gr_size > min) 
+				{
+					//printf("przerzucono wierzcholek %d\n", node[j]->
+
+					group[node[j]->group].gr_size--;
+					node[j]->group = node[j]->gr_gain;
+                                	group[group_gain].gr_nodes[group[group_gain].gr_size] = node[j]->nr;
+                                	group[group_gain].gr_size++;
+				}
+			}
+		}
+	}
+
 }
