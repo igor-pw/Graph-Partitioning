@@ -231,6 +231,8 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 			}
 			free(l[i][j]);
 		}
+
+		free(l[i]);
 	}
 
 	free(l);
