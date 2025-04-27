@@ -124,6 +124,7 @@ void rm_first(que_list **head){
 	else{
 		(*head)->last = first_node->last;
 	}
+	free(first_node);
 }
 
 int is_valid(que_list **head, node_t *t, int gr){
