@@ -223,8 +223,14 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
         	}
     	}
 
-	for(int i = 0; i < ngroups; i++)
-		free(l[i]);
+	for(int i = 0; i < ngroups; i++){
+		for(int j=0; j< tmp; j++){
+			while(l[i][j] != NULL){
+				rm_first(&l[i][j]);
+			}
+			free(l[i][j]);
+		}
+	}
 
 	free(l);
 
