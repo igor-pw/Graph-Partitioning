@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 
 	int n = 0;
 	int nodes = 0;
-	int D_norm = 0;
+	double D_norm = 0;
 	int connections1 =0;
 	fscanf(in, "%d\n", &n);
 	
@@ -122,14 +122,14 @@ int main(int argc, char **argv)
 	double *beta_coefs = calloc(nodes, sizeof(double));
 
 	//CSR macierzy Laplace'a
-	csr_t compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
+	csr_t compressed_L_matrix = create_compressed_matrix(L_matrix, nz, nodes);
 	
 	//obliczenie wspolczynnikow alfa i beta
-	calculate_coefs(compresed_L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
+	calculate_coefs(compressed_L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, nodes, 0, ITERATIONS);
 	printf("Wspolczynniki alfa i beta\n");
 
 	free(prev_initial_vec);
-	free_csr(compresed_L_matrix);
+	free_csr(compressed_L_matrix);
 
 	//utworzenie macierzy tridiagonalnej na postawie wspolczynnikow
 	double **T_matrix = create_T_matrix(alfa_coefs, beta_coefs, ITERATIONS);
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 		L_matrix[i][i] -= eigenvalue;	
 
 	//CSR przeksztalconej macierzy Laplace'a
-	compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
+	compressed_L_matrix = create_compressed_matrix(L_matrix, nz, nodes);
 	
 	//wspolczynniki metody gradientowej
 	double learning_rate = 0.001;
@@ -190,14 +190,14 @@ int main(int argc, char **argv)
 	//wektor wlasny
 	do
 	{
-		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compresed_L_matrix, nodes, learning_rate, momentum, velocity, &epsilon_margin, &epsilon, &prev_epsilon);
+		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compressed_L_matrix, nodes, learning_rate, momentum, velocity, &epsilon_margin, &epsilon, &prev_epsilon);
 	
 	} while(epsilon > epsilon_margin);
 
 	printf("Wektor wlasny\n");
 	
 	free(velocity);
-	free_csr(compresed_L_matrix);
+	free_csr(compressed_L_matrix);
 
 	//cofniecie zmian w macierzy Laplace'a
 	for(int i = 0; i < nodes; i++)

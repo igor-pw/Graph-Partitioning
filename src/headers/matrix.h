@@ -13,7 +13,7 @@
 
 int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1);
 double **create_L_matrix(int **A_matrix, int *D_vector, int n);
-csr_t create_compresed_matrix(double **L_matrix, int nz, int n);
+csr_t create_compressed_matrix(double **L_matrix, int nz, int n);
 double **create_T_matrix(double *a, double *b, int k);
 void print_matrix(double **matrix, int n);
 void calculate_coefs(csr_t L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k);

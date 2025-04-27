@@ -3,28 +3,37 @@
 
 static int depth = 0;
 
-int *create_D_vector(int **matrix, int n, int *D_norm)
+int *create_D_vector(int **matrix, int n, double *D_norm)
 {	
 	//alokujemy pamiec na n wskaznikow do tablic
         int *D_vector = malloc(sizeof(int) * n);	
 
 	int sum = 0;
 
-	for(int i = 0; i < n; i++){
+	for(int i = 0; i < n; i++)
+	{
 		sum = 0;
-		for(int j = 0; j < n; j++){ 
-			sum+=matrix[i][j];	// dodajemy wszystkie elemnty wiersza tablicy matrix
-		}
-		D_vector[i] = sum;	// wstawiamy do wektora wartosc sumy wiersza		
-		*D_norm += pow(sum, 2); //potrzebne do obliczenia wektora poczatkowego (normalizacja L2) 
+
+		//dodajemy wszystkie elemnty wiersza tablicy matrix
+		for(int j = 0; j < n; j++)
+			sum+=matrix[i][j];	
+	
+		//wstawiamy do wektora wartosc sumy wiersza		
+		D_vector[i] = sum;
+
+		//dodajemy kwadrat wartosci sumy wiersza 
+		*D_norm += pow(sum, 2); 
 	}
-	return D_vector; // zwracamy wektor
+
+	//obliczamy dlugosc wektora
+	*D_norm = sqrt(*D_norm);
+
+	return D_vector; 
 }
 
 double vec_norm(double *vec, int n)
 {
-        //normalizacja wektora (dlugosc)
-        //poprawilem funkcje bo powinna zwraca wspolczynnik a nie wektor
+        //normalizacja L2 wektora
 
         double sum = 0;
 
@@ -55,21 +64,20 @@ void print_vec(double *vec, int n)
 
 double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
 {
-        //mnozy macierz przez wektor
+        //wypelnienie wektora wynikowego zerami
         double *result_vec = calloc(n, sizeof(double));
 
         for(int i = 0; i < n; i++)
         {
+		//dodajemy do i-tego elementu wektora wynikowego wynik mnozenia i,j elemntu macierzy przez j-ty element wektora
                 for(int j = 0; j < n; j++)
                         result_vec[i] += matrix[i][j]*vec[j];
-        
-		//printf("vector: %g\n", result_vec[i]);
 	}
 
         return result_vec;
 }
 
-double *multiply_compresed_mtx_by_vec(csr_t csr, double *vec, int n)
+double *multiply_compressed_mtx_by_vec(csr_t csr, double *vec, int n)
 {
 	double *result_vec = calloc(n, sizeof(double));
 		
@@ -79,8 +87,6 @@ double *multiply_compresed_mtx_by_vec(csr_t csr, double *vec, int n)
 		{
 			result_vec[i] += csr->values[j]*vec[csr->col_index[j]]; 	
 		}
-
-		//printf("halo: %g\n", result_vec[i]);
 	}
 
 	return result_vec;
@@ -97,13 +103,13 @@ double multiply_vec_by_vec(double *vec, double *vecT, int n)
         return result;
 }
 
-double *create_initial_vec(int *D_vector, int D_norm, int n)
+double *create_initial_vec(int *D_vector, double D_norm, int n)
 {
         //tworzy wektor poczatkowy
         double *initial_vec = malloc(sizeof(double) * n);
 
         for(int i = 0; i < n; i++)
-                initial_vec[i] = (double)(D_vector[i])/sqrt((double)D_norm);
+                initial_vec[i] = (double)(D_vector[i])/D_norm;
 
         return initial_vec;
 }
@@ -145,8 +151,8 @@ double find_smallest_eigenvalue(double *vec, int n)
 
 double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
 {
-	double *r_vec = multiply_compresed_mtx_by_vec(matrix, vec, n);
-	double *gradient = multiply_compresed_mtx_by_vec(matrix, r_vec, n);
+	double *r_vec = multiply_compressed_mtx_by_vec(matrix, vec, n);
+	double *gradient = multiply_compressed_mtx_by_vec(matrix, r_vec, n);
 
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;

@@ -108,6 +108,7 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 
 	*connections1 = countconnect;
 	*nodes = size;
+	
 	return matrix;
 }
 
@@ -132,9 +133,15 @@ double **create_L_matrix(int **A_matrix, int *D_vector, int n)
 	return L_matrix;
 }
 
-csr_t create_compresed_matrix(double **matrix, int nz, int n)
+csr_t create_compressed_matrix(double **matrix, int nz, int n)
 {
+	//nz - ilosc niezerowych elementow macierzy
+	//n - ilosc wierszy
+
+	//alokacja pamieci dla struktury
 	csr_t csr = malloc(sizeof(*csr));	
+
+	//alokacja pamieci tablic
 	csr->values = malloc(sizeof(double) * nz);
 	csr->col_index = malloc(sizeof(int) * nz);
 	csr->row_ptr = malloc(sizeof(int) * (n+1));
@@ -142,40 +149,58 @@ csr_t create_compresed_matrix(double **matrix, int nz, int n)
 	csr->row_ptr[0] = 0;
 
 	int counter = 0;
+	
 	for(int i = 0; i < n; i++)
 	{
 		for(int j = 0; j < n; j++)
 		{
 			if(matrix[i][j] != 0)
 			{
+				//zapisanie niezerowego elementu do tablicy
 				csr->values[counter] = matrix[i][j];
+
+				//zapisanie jego numeru kolumny
 				csr->col_index[counter] = j;
+
 				counter++;
 			}
 		}
-			
+		
+		//zapisanie indeksu ostatniego elementu w danym wierszu
 		csr->row_ptr[i + 1] = counter;
 	}
 
 	return csr;
 }
 
-double **create_T_matrix(double *a, double *b, int k){ //tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
-	//dodane do ulatwienia testowania funkcji	
-	double **tri = malloc(sizeof(double*) * k);
+double **create_T_matrix(double *a, double *b, int k)
+{ 
+	//tworzenie macierzy trojdiagonalnej, k to jest rozmiar wektora a 
+	
+	//alokacja pamieci
+	double **T_matrix = malloc(sizeof(double*) * k);
 
 	for(int i = 0; i < k; i++)
-                tri[i] = calloc(k, sizeof(double)); 
-	
-	int t = k-1; //z wektora b zuzyje sie k-1 elementow
-	for(int i = 0; i<t; i++){// wypelnienie macierzy
-		tri[i][i] = a[i];//wartosci a znajduja sie na diagonali
-		tri[i][i+1] = b[i];//wartosci b sa pod i po prawo od wartosci b
-		tri[i+1][i] = b[i];
-	}
-	tri[t][t] = a[t]; //dodanie a na k x k miejsce bo nie moze byc b pod nim i obok
-	return tri;
+                T_matrix[i] = calloc(k, sizeof(double)); 
 
+	//z wektora b zuzyje sie k-1 elementow
+	int t = k-1; 
+	
+	//wypelnienie macierzy
+	for(int i = 0; i < t; i++)
+	{
+		//wartosci a umieszczamy na diagonali macierzy
+		T_matrix[i][i] = a[i];
+
+		//wartosci b umieszaczamy nad oraz pod diagonala macierzy
+		T_matrix[i][i+1] = b[i];
+		T_matrix[i+1][i] = b[i];
+	}
+
+	//dodanie a na k x k miejsce
+	T_matrix[t][t] = a[t]; 
+	
+	return T_matrix;
 }
 
 void print_matrix(double **matrix, int n)
@@ -197,7 +222,7 @@ void print_matrix(double **matrix, int n)
 void calculate_coefs(csr_t L_matrix, double *initial_vec, double *prev_initial_vec, double *alfa_coefs, double *beta_coefs, int n, int i, int k)
 {
 	//wektor resztowy
-	double *residual_vec = multiply_compresed_mtx_by_vec(L_matrix, initial_vec, n);
+	double *residual_vec = multiply_compressed_mtx_by_vec(L_matrix, initial_vec, n);
 
 	//dla i > 0 odejmujemy poprzedni wektor poczatkowy
 	if(i > 0)
@@ -238,14 +263,18 @@ double **create_G_matrix(double **T_matrix, int n, int x)
 	double c = T_matrix[x][x]/r;
 
 	//tworzymy transponowana macierz rotacji Givensa
+	
+	//alokacja pamieci
 	double **G_matrix = malloc(sizeof(double*) * n);
 	
 	for(int i = 0; i < n; i++)
 			G_matrix[i] = calloc(n, sizeof(double));
 
+	//wypelniamy elementy diagonalne jedynkami
 	for(int i = 0; i < n; i++)
-		G_matrix[i][i] = 1.0L;
+		G_matrix[i][i] = 1.0;
 
+	//wstawiam obliczone wspolczynniki do macierzy
 	G_matrix[x][x] = c;
 	G_matrix[x+1][x+1] = c;
 	G_matrix[x][x+1] = s;
@@ -281,11 +310,16 @@ void copy_matrix(double **src_matrix, double **dest_matrix, int n)
 
 double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n)
 {
+	//mnozenie macierzy przez macierz
+
+	//alokacja pamieci
 	double **result_matrix = malloc(sizeof(double*) * n);
 
+	//wypelniamy macierz wynikowa zerami
 	for(int i = 0; i < n; i++)
 		result_matrix[i] = calloc(n, sizeof(double));
 
+	//dodajemy wyniki mnozenia dla elementu i,k lewej macierzy z elementem k,j prawej macierzy do i,j elementu macierzy wynikowej
 	for(int i = 0; i < n; i++)
 	{
 		for(int j = 0; j < n; j++)
@@ -317,7 +351,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	if(i == 0)
 		copy_matrix(G_matrix, Q_matrix, n);
 	
-	//pozniej mnozymy kazda otrzymana macierz rotacji Givensa przez wczesniejsz, na koniec otrzymamy iloraz wszystkich macierzy rotacji Givensa
+	//dla kolejnych przejsc mnozymy kazda otrzymana macierz rotacji Givensa przez wczesniejsza, aby na koniec otrzymac iloraz wszystkich macierzy rotacji Givensa
 	else
 	{
 		double ** new_Q_matrix = multiply_mtx_by_mtx(Q_matrix, G_matrix, n);
@@ -328,6 +362,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	free_matrix(G_matrix, n);
 	i++;
 
+	//wywolujemy rekurencyjnie funkcje dla zaaktualizowanych macierzy
 	if(i < n-1)
 		calculate_eigenvalue(T_matrix, Q_matrix, n, i);
 
