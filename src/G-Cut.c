@@ -73,8 +73,8 @@ int main(int argc, char **argv)
 	
 	// ilosc wierzcholkow w grupach
 	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); 	
-	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); 	
-	printf("nodes: %d, max: %d, low: %d\n", nodes, max_nodes, low_nodes);
+	int min_nodes = (int)ceil((double)nodes/divide*(1-margin)); 	
+	printf("nodes: %d, max: %d, low: %d\n", nodes, max_nodes, min_nodes);
 
 	if(max_nodes*divide < nodes){		
 		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
@@ -88,13 +88,12 @@ int main(int argc, char **argv)
 	}	
 
 	//wektor stopni obliczony na podstawie macierzy sasiedztwa
-	//zmienilem na wektor zeby mniej pamieci zajmowalo
 	int *D_vector = create_D_vector(A_matrix, nodes, &D_norm);
 	printf("Wektor Stopni\n");
 
 	int all_edges = 0;
 	int nz = 0;
-
+	
 	for(int i = 0; i < nodes; i++)
 	{
 		all_edges += D_vector[i];
@@ -107,6 +106,7 @@ int main(int argc, char **argv)
 	double **L_matrix = create_L_matrix(A_matrix, D_vector, nodes);
 	printf("Macierz Laplace'a\n");
 
+	//dodawanie sasiadow
 	ad_nb_nodes(t,L_matrix,nodes);
 	printf("Dodanie sasiadow\n");
 
@@ -121,6 +121,7 @@ int main(int argc, char **argv)
 	double *alfa_coefs = calloc(nodes, sizeof(double));
 	double *beta_coefs = calloc(nodes, sizeof(double));
 
+	//CSR macierzy Laplace'a
 	csr_t compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
 	
 	//obliczenie wspolczynnikow alfa i beta
@@ -146,10 +147,10 @@ int main(int argc, char **argv)
 	//zamiana macierzy tridiagonalnej w diagonalna, ktorej elementy diagonali sa wartosciami wlasnymi	
 	for(int i = 0; i < ITERATIONS/2; i++)
 		calculate_eigenvalue(T_matrix, Q_matrix, ITERATIONS, 0);
+	
+	printf("Wartosci wlasne\n");
 
 	free_matrix(Q_matrix, ITERATIONS);
-
-	printf("Wartosci wlasne\n");
 
 	//kopiujemy wartosci wlasne do wektora
 	double *eigenvalues_vec = malloc(sizeof(double) * ITERATIONS);
@@ -169,11 +170,12 @@ int main(int argc, char **argv)
 	for(int i = 0; i < nodes; i++)
 		L_matrix[i][i] -= eigenvalue;	
 
+	//CSR przeksztalconej macierzy Laplace'a
 	compresed_L_matrix = create_compresed_matrix(L_matrix, nz, nodes);
 	
+	//wspolczynniki metody gradientowej
 	double learning_rate = 0.001;
 	double momentum = 0.8;
-
 	double epsilon_margin = pow(10, -12);
 
 	if(nodes > 5000)
@@ -192,41 +194,45 @@ int main(int argc, char **argv)
 	
 	} while(epsilon > epsilon_margin);
 
+	printf("Wektor wlasny\n");
+	
 	free(velocity);
 	free_csr(compresed_L_matrix);
-	printf("Wektor wlasny\n");
 
 	//cofniecie zmian w macierzy Laplace'a
 	for(int i = 0; i < nodes; i++)
 		L_matrix[i][i] += eigenvalue;	
 
-	assing_eigen(t, eigenvector,nodes);
+	//przypisanie wartosci wektora wlasnego
+	assing_eigen(t, eigenvector, nodes);
 	printf("Przydzielenie wartosci wektora wlasnego\n");
 
 	//sortujemy wektor wlasny
 	qsort(eigenvector, nodes, sizeof(double), compare);
 
-	int ngroups = divide;
-	
-	
-	list_gr_con(t,g,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
+	//przypisanie grup
+	list_gr_con(t,g,nodes,divide,max_nodes,D_vector,eigenvector,L_matrix);	
 	printf("Przydzielenie grup\n");
 
-	gain_calculate(t, ngroups, nodes);
-	printf("Obliczenie korzysci dla rafinacji\n");
+	//obliczenie korzysci rafinacji
+	gain_calculate(t, divide, nodes);
+	printf("Obliczenie korzysci rafinacji\n");
 
-	for(int i = 0; i < 10; i++)	
+	//rafinacja
+	for(int i = 0; i < 5; i++)	
 	{
 		find_leaves(t, nodes);
-		refine_groups(t, nodes, g, max_nodes, low_nodes);
-		gain_calculate(t, ngroups, nodes);
+		refine_groups(t, nodes, g, max_nodes, min_nodes);
+		gain_calculate(t, divide, nodes);
 	}
 	printf("Rafinacja grup\n");
 
-	bool in_margin = is_in_margin(g, divide, low_nodes, max_nodes);
+	//sprawdzenie czy grupy mieszcza sie w marginesie
+	bool in_margin = is_in_margin(g, divide, min_nodes, max_nodes);
 
+	//zapisanie podzialu do pliku oraz wypisanie rezultatow podzialu
 	if(in_margin)
-		print_results(t,g,nodes,ngroups,A_matrix,max_nodes,low_nodes,n, all_edges, output_name);	
+		print_results(t, g, nodes, divide, A_matrix, max_nodes, min_nodes, n, all_edges, output_name);	
 	
 	else
 		printf("\nPodzial grafu zakonczyl sie niepowodzeniem. Zwieksz margines bledu lub zmniejsz ilosc grup\n");
@@ -236,12 +242,8 @@ int main(int argc, char **argv)
 	free_matrix(L_matrix, nodes);
 	free(eigenvector);
 	free(D_vector);
-	for(int i = 0; i < divide; i++){
-                free(g[i].gr_nodes);
-                free(g[i].no_con);
-        } 	
-	
-	free_struct_node(t, nodes);
+	free_group(g, divide);
+	free_node(t, nodes);
 	free(g);
 
 	if(!in_margin)

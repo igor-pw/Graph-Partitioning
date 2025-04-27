@@ -37,8 +37,8 @@ int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes){
 
 void ad_nb_nodes(node_t *t, double **L_matrix, int nodes){
 	for(int i = 0; i< nodes; i++){
-		t[i]->connected=malloc(L_matrix[i][i] * sizeof(int));
-		t[i]->con_count=L_matrix[i][i];
+		t[i]->connected = malloc(L_matrix[i][i] * sizeof(int));
+		t[i]->con_count = L_matrix[i][i];
 		int tmp = 0;
 		for(int j =0; j< nodes; j++){
 			if(L_matrix[i][j] == -1){
@@ -96,6 +96,7 @@ void add_to_end(que_list **head, int con){
 		last_node->next = new_node;
 		(*head)->last = new_node;
 	}
+
 }
 
 
@@ -150,7 +151,7 @@ void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector){
 			t[node]->group = gr;
 			g[gr].gr_nodes[g[gr].gr_size] = node;
 			g[gr].gr_size++;
-			return;		
+			return;	
 			}
 	
 		}
@@ -222,8 +223,10 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
         	}
     	}
 
-	
+	for(int i = 0; i < ngroups; i++)
+		free(l[i]);
 
+	free(l);
 
 }
 
@@ -241,8 +244,8 @@ void refine_groups(node_t *node, int n, grupa_g group, int max, int min)
 				group[node[i]->group].gr_size--;
 				node[i]->group = node[i]->gr_gain;
 				node[i]->gr_gain = -1;
+				node[i]->gain = 0;
 				group[group_gain].gr_size++;
-				//node[i]->is_leaf = false;	
 			}
 		}
 	}
@@ -258,4 +261,13 @@ bool is_in_margin(grupa_g group, int n, int min, int max)
 
 	return true;
 
+}
+
+void free_group(grupa_g group, int n)
+{
+	for(int i = 0; i < n; i++)
+	{
+		free(group[i].gr_nodes);
+		free(group[i].no_con);
+	}
 }

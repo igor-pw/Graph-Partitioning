@@ -52,11 +52,11 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 				countgr++;
 			}
 		}
+			printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 		gr_nodes[i]=countgr;
 		if(countgr <low_nodes || countgr > max_nodes)
 		{
 			group_margin++;
-			printf("ilosc wierzcholkow w gr %d: %d", i , countgr);
 			printf(" <---- grupa niezgonda z marginesem!!!!\n");
 		}
 		//else
@@ -106,32 +106,13 @@ void find_leaves(node_t *node, int n)
 	}
 }
 
-/*void cut_dfs(node_t *node, grupa_g group, int group_nr, int index, int cut_target, int *cut_index, int counter)
-{
-	int next_index = -1;
-
-	if(!node[index]->visited && node[index]->group == group_nr)
-		next_index = node[index]->connected[0];
-
-	for(int i = 0; i < node[index]->con_count; i++)
-	{
-		if(!node[index]->visited && node[index]->group == node[node[index]->connected[i]]->group && node[index]->con_count > node[node[index]->connected[i]]->con_count)
-			next_index = node[node[index]->connected[i]]->nr;
-	}
-				
-	cut_index[counter] = next_index;
-	node[index]->visited = true;
-	printf("ilosc krawedzi w badanych wierzcholku: %d\n", node[next_index]->con_count);
-	counter++;
-
-	if(counter < cut_target)
-		cut_dfs(node, group, group_nr, next_index, cut_target, cut_index, counter);	
-}*/
-
-void free_struct_node(node_t *t, int n)
+void free_node(node_t *t, int n)
 {
 	for(int i = 0; i < n; i++)
+	{
+		free(t[i]->connected);
 		free(t[i]);
+	}
 
 	free(t);
 }

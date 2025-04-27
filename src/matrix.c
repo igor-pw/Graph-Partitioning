@@ -6,7 +6,6 @@
 
 int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 {
-	//poprawic wyglada kodu, dodac funkcje opowiedzialna za odczytywanie pliku
 	int size = 0;
 	char c = ';';
 	int index[am];
@@ -42,7 +41,7 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 					(*t)[c2]->y = cl;
 					(*t)[c2]->eigenvalue = 0.0;
 					(*t)[c2]->is_leaf = false;
-					(*t)[c2]->visited = false;
+					(*t)[c2]->moved = false;
 					c2++;
 				}
 
@@ -337,8 +336,6 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 		//tworzymy nowa macierz tridiagonalna T' i kopiujemy ja do starej macierzy T
 		double **new_T_matrix = multiply_mtx_by_mtx(T_matrix, Q_matrix, n);
 		copy_matrix(new_T_matrix, T_matrix, n);
-		//pozbywamy sie bledow numerycznych
-		//force_zeros(T_matrix, n, 0.001);
 		free_matrix(new_T_matrix, n);
 	}	
 }

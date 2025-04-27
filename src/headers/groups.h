@@ -16,5 +16,7 @@ int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes);
 void con_free_nodes(node_t *t, grupa_g g ,int nodes);
 void refine_groups(node_t *node, int n, grupa_g group, int max, int min);
 bool is_in_margin(grupa_g group, int n, int min, int max);
+void free_group(grupa_g group, int n);
+
 #endif
 

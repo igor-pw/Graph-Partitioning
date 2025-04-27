@@ -145,14 +145,7 @@ double find_smallest_eigenvalue(double *vec, int n)
 
 double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
 {
-	//nowa wersja
-	//double *r_vec = multiply_mtx_by_vec(gradient_matrix, vec, n);
 	double *r_vec = multiply_compresed_mtx_by_vec(matrix, vec, n);
-	
-	/*for(int i = 0; i < n; i++)
-		if(r_vec[i] != test_vec[i])
-			printf("nie dziala\n");
-	*/
 	double *gradient = multiply_compresed_mtx_by_vec(matrix, r_vec, n);
 
 	for(int i = 0; i < n; i++)
@@ -178,8 +171,6 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matri
 
 	*epsilon = sqrt(*epsilon);
 	
-	//printf("epsilon: %g\n", *epsilon);
-
 	free(r_vec);
 	free(gradient);
 
@@ -288,7 +279,6 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 	g[n-1].gr_size =1;
 	t[node]->group = n-1;
 
-	
 	free(eigen_tmp);
 	free(node_gr);
 }

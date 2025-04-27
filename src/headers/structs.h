@@ -14,16 +14,16 @@ typedef struct node{
 	int *connected;
 	int x, y, group, gain, gr_gain, con_count;
 	bool is_leaf;
-	bool visited;
+	bool moved;
 	double eigenvalue;
-} * node_t;
+} *node_t;
 
 typedef struct grupa{
 	int *gr_nodes;
 	int *no_con;
 	int gr_size;
 	int max_con;
-} * grupa_g;
+} *grupa_g;
 
 typedef struct que_list{
 	int que;
