@@ -40,8 +40,6 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 					(*t)[c2] = malloc(sizeof(struct node));
 					(*t)[c2]->x = x;
 					(*t)[c2]->y = cl;
-					(*t)[c2]->nr = c2;
-					(*t)[c2]->index = c2;
 					(*t)[c2]->eigenvalue = 0.0;
 					(*t)[c2]->is_leaf = false;
 					(*t)[c2]->visited = false;
@@ -350,38 +348,6 @@ void assing_eigen(node_t *t, double *eigenvector, int n){
 			t[i]->eigenvalue=eigenvector[i];
 }
 
-//	|	x	|	y	|	z	|
-/*
-void assing_group(node_t t, int n, int ngr, double *centyle){
-	for(int i =0; i<n; i++){
-			for(int j = 1; j <= ngr + 1; j++){
-				if(t[i].eigenvalue >= centyle[j-1] && t[i].eigenvalue < centyle[j])
-					t[i].group = j -1;
-			}
-	}
-	
-}
-*/
-/*
-void connections(node_t t, int n, int **A_matrix, int *connections2){
-	int v[n];
-	int count = 0;
-	for(int i =0; i < n; i++){
-		for(int j =i; j < n; j++){
-			if(t[i].group == t[j].group && A_matrix[i][j] == 1){
-				v[count] = j;
-				count++;
-			}
-		}
-		t[i].connected=malloc(count*sizeof(int));
-		for(int j = 0; j<count; j++)
-			t[i].connected[j]=v[j];
-		t[i].vle=count;
-		*connections2 +=count;
-		count =0;
-	}
-}
-*/
 void gain_calculate(node_t *t, int ngroups, int nodes)
 {
 	int dif[ngroups];
@@ -401,7 +367,6 @@ void gain_calculate(node_t *t, int ngroups, int nodes)
 		{
 			if( dif[j] != 0 )
 			{
-				//printf("cur_node_gr = %d, j = %d, ngroups = %d, i =%d, t[i]->group = %d\n",cur_node_gr,j,ngroups,i,t[i]->group);
 				int tmp = dif[cur_node_gr] - dif[j];
 				
 				if(tmp < min)

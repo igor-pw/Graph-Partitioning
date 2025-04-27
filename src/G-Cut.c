@@ -72,14 +72,10 @@ int main(int argc, char **argv)
 		ITERATIONS = nodes;
 	
 	// ilosc wierzcholkow w grupach
-	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); // to ile moze byc max w grupie z marginesem
-	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); // to ile moze byc najmniej w grupie z marginesem
-	// zrobilem to w to bo np avg moze byc 1.4 i jak zaokrogle to margines moze sie rozjechac
-
-	//cos tu nie gra bo dla marginesu 1% max jest mniejszy od low
+	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); 	
+	int low_nodes = (int)ceil((double)nodes/divide*(1-margin)); 	
 	printf("nodes: %d, max: %d, low: %d\n", nodes, max_nodes, low_nodes);
 
-	//noi ten warunek nie wiem dlaczego tez nie dziala bo przechodzi dla 105 < 102 co nie jest prawda
 	if(max_nodes*divide < nodes){		
 		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
 		printf("prosze zmienic ilosc grup na jaka chcemy podzielic graf, badz zwiekszyc margines!\n");
@@ -87,7 +83,7 @@ int main(int argc, char **argv)
 	}
 
 	for(int i = 0; i < divide; i++){
-		g[i].gr_nodes = malloc(nodes * sizeof(int)); // dalem tak bo potem moze przez chwile bedzie potrzebne zeby poza margines wychodzilo
+		g[i].gr_nodes = malloc(nodes * sizeof(int)); 
 		g[i].no_con = calloc(nodes, sizeof(int));
 	}	
 
@@ -212,9 +208,8 @@ int main(int argc, char **argv)
 
 	int ngroups = divide;
 	
-	//assign_groups(t, A_matrix, nodes, ngroups, eigenvector, g, L_matrix, max_nodes);
 	
-	list_gr_con(t,g,nodes,ngroups,max_nodes,low_nodes,D_vector,eigenvector,L_matrix);	
+	list_gr_con(t,g,nodes,ngroups,max_nodes,D_vector,eigenvector,L_matrix);	
 	printf("Przydzielenie grup\n");
 
 	gain_calculate(t, ngroups, nodes);
@@ -235,8 +230,7 @@ int main(int argc, char **argv)
 	
 	else
 		printf("\nPodzial grafu zakonczyl sie niepowodzeniem. Zwieksz margines bledu lub zmniejsz ilosc grup\n");
-	//print_gain(t, nodes);
-	//printf("finito\n");
+
 	//zwolnienie pamieci
 	free_int_matrix(A_matrix, nodes);
 	free_matrix(L_matrix, nodes);

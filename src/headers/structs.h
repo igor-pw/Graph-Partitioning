@@ -12,7 +12,7 @@ typedef struct csr
 
 typedef struct node{
 	int *connected;
-	int nr, x, y, group, index, gain, gr_gain, con_count;
+	int x, y, group, gain, gr_gain, con_count;
 	bool is_leaf;
 	bool visited;
 	double eigenvalue;

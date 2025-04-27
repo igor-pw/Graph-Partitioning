@@ -217,7 +217,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 
 	for(int i =1; i<n; i++){
 		int ind_k = (int)round(i*div);
-		int ind_p = (int)round((i-1)*div)+1; // pomijamy elemnt 0, mozna pomyslec czy jakos latwo mozna go uwzglednic
+		int ind_p = (int)round((i-1)*div)+1;
 		tmp = ind_k;
 		int size = ind_k-ind_p+1;
 		double *eigen_tmp = malloc(size * sizeof(double));
@@ -241,15 +241,11 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 			}
 		}
 		
-		double xd = 0.0;
-		double pj = eigen_tmp[0];
-		double pk = eigen_tmp[size-1];
 		for(int j = 0; j< size; j++){
 			int nr = node_gr[j];
 			if(L_matrix[nr][nr] > max_len){
 				max_len = L_matrix[nr][nr];
 				node = nr;
-				xd = eigen_tmp[j]; 
 			}
 		}
 
@@ -257,7 +253,6 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 		g[i-1].gr_size =1;
 		t[node]->group = i-1;
 		
-		//printf("Najwiecej polonczen w gr %d ma wieszcholek %d -> %d\t przedzial - %.15lf, %.15lf  wartosc - %.15lf\n", i-1, g[i-1].gr_nodes[0], max_len, pj,pk,xd);
 		free(eigen_tmp);
 		free(node_gr);
 		}
