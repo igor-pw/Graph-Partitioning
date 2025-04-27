@@ -205,29 +205,34 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matri
 		return vec;
 }
 
-void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix){ //158
-	double div = (double)k/n;
+void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix){
+	double div = (double)k/n; // sredni rozmiar grupy
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
-	
+
+	//przydzielamy kazdemu wieszcholkowi gr -1 co jest rownoznaczne z tym, ze wieszcholek nie zostal przydzielony do zadnej grupy	
 	for(int i = 0; i< k; i++)
 		t[i]->group = -1;
-
+	
+	//przechodzimy po kazdej grupie
 	for(int i =1; i<n; i++){
+		//wyznaczamy zakres na jaki patrzymy w wektorze wartosci wlasnych
 		int ind_k = (int)round(i*div);
 		int ind_p = (int)round((i-1)*div)+1;
 		tmp = ind_k;
 		int size = ind_k-ind_p+1;
 		double *eigen_tmp = malloc(size * sizeof(double));
 		int count = 0;
+		//zapisujemy wartosci wlasne z badanego zakresu
 		for(int j = ind_p; j <= ind_k; j++){
 			eigen_tmp[count] = eigenvector[j];
 			count++;
 		}
-
+		
 		int max_len = -1;
 		int node = -1;
-
+		
 		int *node_gr = malloc(size * sizeof(int));
+		//szukamy wieszcholkow ktore maja dana wartosc wlasna
 		for(int j = 0; j < size; j++){
 			for(int l =0; l < k; l++){
 				if(eigen_tmp[j] == t[l]->eigenvalue){
@@ -237,7 +242,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 
 			}
 		}
-		
+		//szukamy wieszcholka z najwieksza liczba polonczen aby wybrac go jako korzen
 		for(int j = 0; j< size; j++){
 			int nr = node_gr[j];
 			if(L_matrix[nr][nr] > max_len){
@@ -245,7 +250,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 				node = nr;
 			}
 		}
-
+		//przydzielamy korzeniowi grupe i wpisujemy go tablicy z wieszcholkami grupy
 		g[i-1].gr_nodes[0] = node;
 		g[i-1].gr_size =1;
 		t[node]->group = i-1;
@@ -253,6 +258,7 @@ void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, doubl
 		free(eigen_tmp);
 		free(node_gr);
 		}
+	//robimy to samo tylko ze dla ostatniej grupy, uwzgledniamy tutaj niedokladnosc wynikajac z reszty przy dzieleniu na grupy 
 	int size = k - tmp;
 	double *eigen_tmp = malloc(size * sizeof(double));
 	int count = 0;

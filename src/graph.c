@@ -6,6 +6,7 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 	FILE *out = fopen(file_name, "w");
 
 	int lu = 0;
+	//wypisujemy polorzenie wieszcholkow
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(lu < nodes && (t[lu]->y == i && t[lu]->x == j)){
@@ -24,7 +25,9 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 
 	int edges = 0;
 
-		printf("\n");
+	printf("\n");
+	
+	//wypisanie polanczen wieszcholkow w grupach
 	for(int k = 0; k <ngroups; k++){
 		fprintf(out, "grupa %d\n", k);
 		for(int i =0; i<nodes; i++){
@@ -47,6 +50,8 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 	int group_margin = 0;
 	int *gr_nodes = malloc(ngroups*sizeof(int));
 	//printf("ilosc wszystkich wierzcholkow: %d\n", nodes);
+	
+	//zliczamy ile jest wieszcholkow w grupie
 	for(int i = 0; i < ngroups; i ++){
 		int countgr = 0;
 		for(int j = 0; j < nodes; j ++){
@@ -55,6 +60,7 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 			}
 		}
 		gr_nodes[i]=countgr;
+		//sprawdzamy czy grupa jest zgodna z marginesem
 		if(countgr <low_nodes || countgr > max_nodes)
 		{
 			group_margin++;
@@ -63,6 +69,7 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 		}
 	}
 
+	//sprawdzamy ciaglosc grupy
 	int *dfs_check = check_gr_con(t,g,ngroups,nodes);
 	for(int i =0; i<ngroups; i++){
 		if(gr_nodes[i] != dfs_check[i]){
@@ -74,7 +81,8 @@ void print_results(node_t *t,grupa_g g, int nodes, int ngroups, int **A_matrix, 
 	printf("Rezultaty:\n");
 
 	printf("ilosc grup niezgodnych z marginesem: %d\n", group_margin);
-
+	
+	//sprawdzamy czy sa wieszcholki nie przypisane do zadnej grupy
 	int wolne_wieszcholki = 0;
 	for(int i =0; i< nodes; i++){
 		if(t[i]->group == -1)
