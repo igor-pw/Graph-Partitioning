@@ -65,8 +65,7 @@ void ad_nb_nodes(node_t *t, double **L_matrix, int nodes){
 void add_to_end(que_list **head, int con){
 	//alokujemy pamiec na nowy elemnt kolejki
 	que_list *new_node = malloc(sizeof(que_list));
-		if(new_node == NULL)
-			printf("ojoj\n");
+
 	//doodajemy wieszcholek i ustawiamy wskaznik na NULL dla nastepnego elemntu
 	new_node->que = con;
 	new_node->next = NULL;
