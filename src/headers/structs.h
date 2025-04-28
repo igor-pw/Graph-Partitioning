@@ -10,22 +10,24 @@ typedef struct csr
 	int *row_ptr;
 } *csr_t;
 
-typedef struct node{
+typedef struct node
+{
 	int *connected;
 	int x, y, group, gain, gr_gain, con_count;
 	bool is_leaf;
-	bool moved;
 	double eigenvalue;
 } *node_t;
 
-typedef struct grupa{
+typedef struct group
+{
 	int *gr_nodes;
 	int *no_con;
 	int gr_size;
 	int max_con;
 } *grupa_g;
 
-typedef struct que_list{
+typedef struct que_list
+{
 	int que;
 	struct que_list *next;
 	struct que_list *last;

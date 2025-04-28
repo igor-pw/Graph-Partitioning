@@ -8,8 +8,11 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 {
 	int size = 0;
 	char c = ';';
+
+	//bufor
 	int index[am];
-	
+
+	//odczytanie 1 linii pliku i zapisanie do bufora
 	while(!isspace(c))
 	{
 		if(fscanf(in, "%d%c", &index[size], &c) == 2)
@@ -18,97 +21,109 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 
 	int start_index;
 	int end_index;
-	c = ';';
 	
 	int cl = 0;
 	int c2 = 0;
+
+	//alokacja pamieci dla tablicy wskaznikow do struktur
 	*t = malloc(size * sizeof(node_t));
 
 	fscanf(in, "%d%c", &start_index, &c); 
 
-	while(!isspace(c))
+	//odczytywanie koncowego indexu i inicjacja struktur wierzcholkow
+	do
 	{
 		if(fscanf(in, "%d%c", &end_index, &c) == 2)
 		{
+			//obliczenie ilosci wierzcholkow w danym wierszu
 			int line = end_index - start_index;
 			if(line != 0)
 			{
 				for(int j = start_index; j < end_index; j++)
 				{
 					int x = index[j];
+
+					//alokacja pamieci dla struktury wierzcholka
 					(*t)[c2] = malloc(sizeof(struct node));
 					(*t)[c2]->x = x;
 					(*t)[c2]->y = cl;
 					(*t)[c2]->eigenvalue = 0.0;
 					(*t)[c2]->is_leaf = false;
-					(*t)[c2]->moved = false;
 					c2++;
 				}
 
 			}
 
 			cl++;
+
+			//zamiana indeksu koncowego na poczatkowy
 			start_index = end_index;
 		}
-	}
 
+	//odczytujemy do momentu napotkania znaku '\n'
+	} while(!isspace(c));
+	
+	//wyzerowanie bufora
 	for(int i = 0; i < size; i++)
 		index[i] = 0;
 
-	c = ';';
-	int counter = 0;
-	
-	while(!isspace(c))
+	int counter = 0;	
+	//odczytanie 4 linii pliku i zapisanie do bufora
+	do
 	{
 		if(fscanf(in, "%d%c", &index[counter], &c) == 2)
 			counter++;
-	}
+	} while(!isspace(c));
 
 	//alokujemy pamiec na size wskaznikow do tablic
         int **matrix = malloc(sizeof(int*) * size);
-
 	//alokujemy pamiec na size elementow i wypelniamy zerami
         for(int i = 0; i < size; i++)
                 matrix[i] = calloc(size, sizeof(int));
 	
 	int countconnect = 0;
-	c = ';';
-	
 	fscanf(in, "%d%c", &start_index, &c);
 
-	while(!isspace(c))
+	//odczytywanie koncowego indexu
+	do
 	{
 		if(fscanf(in, "%d%c", &end_index, &c) == 2)
-		{	
-			int y = index[start_index]; // w index2[] kolejne liczby to wspolzende wieszchlka ktory jest w index[]
-			for(int i = (start_index + 1); i < end_index; i++) // omijamy punkt i bo tam jest wieszcholek z kturego idziemy a i + 1 bo to wskazuje przedzial ile punktuw jest polonczonych z y
+		{
+			//w index2[] kolejne liczby to wspolrzedne wierzcholka ktory jest w index[]	
+			int y = index[start_index]; 
+			
+			//zaczynamy od i + 1, ktory wskazuje przedzial ile punktuw jest polaczonych z y
+			for(int i = (start_index + 1); i < end_index; i++) 
 			{	
 				countconnect++;
-				int x = index[i]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
+				//przechodzimy po wierzcholkach do ktorych punkt y ma przejscie
+				int x = index[i]; 
+				
+				//zapisujemy polaczenie miedzy wierzcholkami do macierzy sasiedztwa
 				matrix[y][x] = 1;
-				matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
+				matrix[x][y] = 1; 
 			}
-
+			//zamiana indeksu koncowego na poczatkowy
 			start_index = end_index;	
 		}
 
 		else
 			break;
-	}	
-	
+	} while(!isspace(c));	
+
+	//odczytanie ostatniego segmentu polaczen
 	int y = index[start_index];
 
 	for(int i = (start_index + 1); i < counter; i++)
 	{
 		countconnect++;
-                int x = index[i]; //przechodzimy po wiezcholkach do ktorych punkt y ma przejscie
+                int x = index[i]; 
                 matrix[y][x] = 1;
-                matrix[x][y] = 1; // np. skoro 0 idzie do 1 to tutaj zaznaczmy ze 1 idzie do 0
+                matrix[x][y] = 1; 
 	}
-
+	//zapisanie wartosci 
 	*connections1 = countconnect;
 	*nodes = size;
-	
 	return matrix;
 }
 
@@ -250,6 +265,7 @@ void calculate_coefs(csr_t L_matrix, double *initial_vec, double *prev_initial_v
 	if(i < k)
 		calculate_coefs(L_matrix, initial_vec, prev_initial_vec, alfa_coefs, beta_coefs, n, i, k);
 
+	//zwalniamy pamiec
 	free(residual_vec);
 }
 
@@ -362,13 +378,13 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	free_matrix(G_matrix, n);
 	i++;
 
-	//wywolujemy rekurencyjnie funkcje dla zaaktualizowanych macierzy
+	//wywolujemy rekurencyjnie funkcje dla zaaktualizowanych macierzy Q
 	if(i < n-1)
 		calculate_eigenvalue(T_matrix, Q_matrix, n, i);
 
 	else if(i == n-1)
 	{
-		//tworzymy nowa macierz tridiagonalna T' i kopiujemy ja do starej macierzy T
+		//tworzymy nowa macierz tridiagonalna T' i kopiujemy ja do macierzy T
 		double **new_T_matrix = multiply_mtx_by_mtx(T_matrix, Q_matrix, n);
 		copy_matrix(new_T_matrix, T_matrix, n);
 		free_matrix(new_T_matrix, n);
@@ -445,9 +461,11 @@ void print_gain(node_t *t, int nodes)
 
 void free_matrix(double **matrix, int n)
 {
+	//zwolnienie pamieci zaalokowanej dla wierszy macierzy
 	for(int i = 0; i < n; i++)
 		free(matrix[i]);
 
+	//zwolnienie pamieci zaalokowanej dla wskaznikow do wierszy macierzy
 	free(matrix);
 }
 
@@ -461,8 +479,11 @@ void free_int_matrix(int **matrix, int n)
 
 void free_csr(csr_t matrix)
 {
+	//zwolnienie pamieci zaalokowanej dla tablic wewnatrz struktury
 	free(matrix->values);
 	free(matrix->col_index);
 	free(matrix->row_ptr);
+
+	//zwolnienie pamieci zaalokowanej dla struktury
 	free(matrix);	
 }

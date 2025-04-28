@@ -33,25 +33,18 @@ int *create_D_vector(int **matrix, int n, double *D_norm)
 
 double vec_norm(double *vec, int n)
 {
-        //normalizacja L2 wektora
+        //norma L2 wektora (dlugosc)
 
         double sum = 0;
 
+	//suma kwadratow wszystkich elementow wektora
         for(int i = 0; i < n; i++)
                 sum += pow(vec[i], 2);
 
+	//zwracamy pierwiastek z sumy
         return sqrt(sum);
 }
-double *vec_sub(double *a, double *b, int k)
-{
-        // odejmowanie wektorow
-        double *sub = calloc(k, sizeof(double));
 
-        for(int i =0; i<k; i++)
-                sub[i] = a[i] - b[i];
-
-        return sub;
-}
 void print_vec(double *vec, int n)
 {
         printf("\n[ ");
@@ -97,6 +90,7 @@ double multiply_vec_by_vec(double *vec, double *vecT, int n)
         //mnozy wektor przez wektor
         double result = 0;
 
+	//sumujemy otrzymane wyniki mnozenia przez siebie i-tych elementow wektora
         for(int i = 0; i < n; i++)
                 result += vecT[i]*vec[i];
 
@@ -106,16 +100,21 @@ double multiply_vec_by_vec(double *vec, double *vecT, int n)
 double *create_initial_vec(int *D_vector, double D_norm, int n)
 {
         //tworzy wektor poczatkowy
+	
+	//alokacja pamieci
         double *initial_vec = malloc(sizeof(double) * n);
 
+	//initial_vec to znormalizowany wektor stopni (norma L2)
         for(int i = 0; i < n; i++)
                 initial_vec[i] = (double)(D_vector[i])/D_norm;
 
         return initial_vec;
 }
+
 void subtract_vec(double *vec, double *coef_vec, double coef, int n)
 {
-        //operacja vec - coef_vec * coef
+        //odejmuje wektor od wektora pomnozonego przez wspolczynnik
+
         for(int i = 0; i < n; i++)
                 vec[i] -= coef*coef_vec[i];
 }
@@ -123,6 +122,7 @@ void subtract_vec(double *vec, double *coef_vec, double coef, int n)
 void divide_vec(double *vec, double coef, int n)
 {
         //dzieli vec przez wspolczynnik
+	
         for(int i = 0; i < n; i++)
                 vec[i] /= coef;
 }
@@ -136,7 +136,7 @@ void copy_vec(double *src_vec, double *dest_vec, int n)
 double find_smallest_eigenvalue(double *vec, int n)
 {
 	//wartosci wlasne sa uporzadkowane od najwiekszej wartosci do najmniejszej wzgledem wartosci bezwzglednej
-	//dlatego szukamy od konca najmniejszej wartosci dodatniej, ktora bedzie szukana wartoscia wlasna macierzy
+	//szukamy od konca najmniejszej wartosci dodatniej, ktora bedzie szukana wartoscia wlasna macierzy
 	
 	double eigenvalue = -1;	
 
@@ -151,6 +151,7 @@ double find_smallest_eigenvalue(double *vec, int n)
 
 double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
 {
+	//
 	double *r_vec = multiply_compressed_mtx_by_vec(matrix, vec, n);
 	double *gradient = multiply_compressed_mtx_by_vec(matrix, r_vec, n);
 
@@ -205,7 +206,7 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matri
 		return vec;
 }
 
-void eigen_centyl(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix){ //158
+void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, double **L_matrix){ //158
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
 	

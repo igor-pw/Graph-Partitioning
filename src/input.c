@@ -1,4 +1,6 @@
+#include <ctype.h>
 #include "headers/input.h"
+
 
 void check_flag(Flags *flags, const char *flag)
 {
@@ -13,7 +15,10 @@ void check_flag(Flags *flags, const char *flag)
 
 	else if(strcmp(flag, "--output") == 0)
 		*flags = Output_name;
-	
+
+	else if(strcmp(flag, "--strict") == 0)
+		*flags = Strict;
+
 	else
 		*flags = Error;
 }
@@ -26,13 +31,16 @@ void *scan_flags(Flags *flags, char **argv, int flag_index)
 		check_flag(flags, argv[flag_index]);
 	
 	if(*flags == 0)
+		return value;
+
+	if(argv[++flag_index][0] == '-')
 	{
-		printf("Podano nieprawidlowa flage\n");
+		*flags = Error;
 		return value;
 	}
 
 	else
-		value = argv[++flag_index];
+		value = argv[flag_index];
 
 	return value;
 }

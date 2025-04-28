@@ -7,81 +7,124 @@
 
 int main(int argc, char **argv)
 {
-	//srand(time(NULL));
 	Flags flags = Error;
 	int argv_index = 1;
 	char *flag_value = NULL;
+	
+	//domyslne wartosci flag 
 	int divide = 2;
 	double margin = 0.1;
 	char *input_name = NULL;
 	char *output_name = "output.txt";
+	bool strict = true;
 
-	for(int i = 0; i < (argc-1)/2; i++)
+	//odczytanie flag i ich wartosci
+	while(argv_index < argc-1)
 	{
+		//odczytanie wskaznika typu void
 		void *ptr_flag_value = scan_flags(&flags, argv, argv_index);
-	
-		flag_value = (char*)ptr_flag_value;
 
-		if(flags == 1)
+		if(ptr_flag_value != NULL)
+		{
+			//rzutowanie wskaznika typu void na napis
+			flag_value = (char*)ptr_flag_value;
+
+			//przypisanie wartosci dla odpowiedniej flagi
+			if(flags == 1)
 			divide = atoi(flag_value);
 
-		else if(flags == 2)
+			else if(flags == 2)
 			margin = atof(flag_value);
 
-		else if(flags == 3)
+			else if(flags == 3)
 			input_name = flag_value;
 	
-		else if(flags == 4)
+			else if(flags == 4)
 			output_name = flag_value;
+
+			else if(flags == 5)
+			{
+				if(*flag_value == '0')
+					strict = false;
+
+				else if(*flag_value == '1')
+					strict = true;
+			}
+		}
+			//po poprawnym odczytaniu flagi i jej wartosci szukamy nastepnej flagi 
+			if(flags != 0)
+				argv_index += 2;
 	
-		argv_index += 2;
+			else
+				++argv_index;
+	}
+
+	if(divide < 2)
+	{
+		printf("Nieprawidlowa wartosc flagi divide\n");
+		return 1;
+	}
+
+	if(margin < 0.0 || margin > 1.0)
+	{
+		printf("Nieprawidlowa wartosc flagi margin\n");
+		return 2;
 	}
 
 	if(input_name == NULL)
-		return 1;
+		return 3;
 		
+	//otwieramy plik z grafem
 	FILE *in = fopen(input_name, "r");
 
 	if(in == NULL)
 	{
 		printf("Nieprawidlowa nazwa pliku\n");
-		return 2;
+		return 4;
 	}
 
 	int n = 0;
 	int nodes = 0;
 	double D_norm = 0;
 	int connections1 =0;
+
+	//odczytujemy maksymalna ilosc wierzcholkow w jednym wierszu
 	fscanf(in, "%d\n", &n);
 	
 	if(n == 0)
-		return 3;
+		return 5;
 
 	node_t *t = NULL;
-	grupa_g g = malloc(divide * sizeof(struct grupa));
+
+	//alokacja pamieci dla tablicy struktur
+	grupa_g g = malloc(divide * sizeof(struct group));
 	
 	//macierz sasiedztwa
 	int **A_matrix = create_A_matrix(in, &nodes, &t, &connections1);
 	printf("Macierz Sasiedztwa\n");
 
+	//zamkniecie pliku do odczytu
 	fclose(in);
 
+	//ilosc iteracji przy obliczaniu macierzy trojdiagonalnej, oraz jej rozmiar
 	int ITERATIONS = 50;
 
+	//rozmiar macierzy trojdiagonalnej musi byc mniejszy rowny rozmiarowi macierzy Laplace'a
 	if(nodes <= 50)
 		ITERATIONS = nodes;
 	
-	// ilosc wierzcholkow w grupach
+	//kryteria ilosci wierzcholkow w grupach
 	int max_nodes = (int)floor((double)nodes/divide*(1+margin)); 	
 	int min_nodes = (int)ceil((double)nodes/divide*(1-margin)); 	
-	printf("nodes: %d, max: %d, low: %d\n", nodes, max_nodes, min_nodes);
 
-	if(max_nodes*divide < nodes){		
+	if(max_nodes*divide < nodes)
+	{		
 		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
 		printf("prosze zmienic ilosc grup na jaka chcemy podzielic graf, badz zwiekszyc margines!\n");
 		return 1;
 	}
 
+	//alokacja pamieci dla tablic w strukturze
 	for(int i = 0; i < divide; i++){
 		g[i].gr_nodes = malloc(nodes * sizeof(int)); 
 		g[i].no_con = calloc(nodes, sizeof(int));
@@ -94,6 +137,7 @@ int main(int argc, char **argv)
 	int all_edges = 0;
 	int nz = 0;
 	
+	//policzenie ilosci krawedzi w grafie
 	for(int i = 0; i < nodes; i++)
 	{
 		all_edges += D_vector[i];
@@ -181,6 +225,7 @@ int main(int argc, char **argv)
 	if(nodes > 5000)
 	       epsilon_margin = pow(10, -5);
 
+	//alokacja pamieci dla wektora predkosci
 	double *velocity = calloc(nodes, sizeof(double));
 
 	double epsilon = 0.0;
@@ -227,12 +272,47 @@ int main(int argc, char **argv)
 	}
 	printf("Rafinacja grup\n");
 
+	int group_margin = 0;
+
+	//zliczenie ilosci wierzcholkow w kazdej z grup
+	int *gr_nodes = count_group_nodes(t, nodes, divide, min_nodes, max_nodes, &group_margin);
+
 	//sprawdzenie czy grupy mieszcza sie w marginesie
 	bool in_margin = is_in_margin(g, divide, min_nodes, max_nodes);
 
-	//zapisanie podzialu do pliku oraz wypisanie rezultatow podzialu
-	if(in_margin)
-		print_results(t, g, nodes, divide, A_matrix, max_nodes, min_nodes, n, all_edges, output_name);	
+	//flaga okreslajaca czy utworzone grup tworza spojne grafy
+	bool is_consistent = true;
+
+	//sprawdzenie spojnosci grup
+	int *dfs_check = check_gr_con(t,g,divide,nodes);
+	for(int i =0; i < divide; i++)
+	{
+		if(gr_nodes[i] != dfs_check[i])
+		{
+			is_consistent = false;
+			break;
+		}
+	}
+
+	//flaga okreslajaca czy wszystkie grupy maja wiecej niz 1 wierzcholek
+	bool is_graph = true;
+
+	//sprawdzenie czy wszystkie grupy tworza grafy
+	for(int i = 0; i < divide; i++)
+	{
+		if(gr_nodes[i] <= 1)
+		{
+			is_graph = false;
+			break;
+		}
+	}	
+
+	free(gr_nodes);
+
+
+	//przy spelnieniu wszystkich wymagow nastepuje zapisanie podzialu do pliku oraz wypisanie rezultatow podzialu
+	if(((in_margin || !strict)) && is_consistent && is_graph)
+		print_results(t, nodes, divide, A_matrix, n, all_edges, output_name, group_margin, strict);	
 	
 	else
 		printf("\nPodzial grafu zakonczyl sie niepowodzeniem. Zwieksz margines bledu lub zmniejsz ilosc grup\n");
@@ -246,9 +326,11 @@ int main(int argc, char **argv)
 	free_node(t, nodes);
 	free(g);
 
-	if(!in_margin)
-		return 4;
-
+	//zwracamy kod niepowodzenia podzialu grafu
+	if((!in_margin && strict) || !is_graph || !is_consistent)
+		return 5;
+	
+	//zwracamy kod powodzenia podzialu grafu
 	return 0;
 }
 

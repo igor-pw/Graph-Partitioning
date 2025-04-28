@@ -2,17 +2,7 @@
 #include <limits.h>
 
 
-int dfs(node_t *t, int node, int gr, int *hbs){
-	int count = 1;
-	hbs[node]=1;
-	for(int i =0; i <t[node]->con_count ; i++){
-		int nb = t[node]->connected[i];
-		if(t[nb]->group == gr && hbs[nb] == 0){
-			count += dfs(t,nb,gr,hbs);
-		}
-	}
-	return count;
-}
+
 
 int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes){
 	int *hbs = calloc(nodes,sizeof(int));
@@ -188,7 +178,7 @@ void con_free_nodes(node_t *t, grupa_g g ,int nodes){
 }
 
 void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, int *D_vector, double *eigenvector, double **L_matrix){
-	eigen_centyl(eigenvector, ngroups, nodes, t, g, L_matrix);
+	eigen_quantile(eigenvector, ngroups, nodes, t, g, L_matrix);
 	que_list ***l = malloc(ngroups * sizeof(que_list**));
 	int tmp = -1;
 	for(int i =0; i < nodes; i++){

@@ -21,7 +21,6 @@ double **create_G_matrix(double **T_matrix, int n, int x);
 void transpose_matrix(double **matrix, int n);
 void copy_matrix(double **src_matrix, double **dest_matrix, int n);
 double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n);
-void make_G_rotation(double **G_matrix, double **T_matrix, int i);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
 void assing_eigen(node_t *t, double *eigenvector, int n);
 void gain_calculate(node_t *t, int ngroups, int nodes);
