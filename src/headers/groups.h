@@ -11,7 +11,7 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 void rm_first(que_list **head);
 int is_valid(que_list **head, node_t *t);
 void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector);
-int dfs(node_t *t, int node, int gr, int *hbs);
+//int dfs(node_t *t, int node, int gr, int *hbs);
 int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes);
 void con_free_nodes(node_t *t, grupa_g g ,int nodes);
 void refine_groups(node_t *node, int n, grupa_g group, int max, int min);

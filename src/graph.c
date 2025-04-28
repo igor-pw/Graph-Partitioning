@@ -6,7 +6,7 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int n, int
 	FILE *out = fopen(file_name, "w");
 
 	int lu = 0;
-	//wypisujemy polorzenie wieszcholkow
+	//wypisujemy polozenie wieszcholkow
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(lu < nodes && (t[lu]->y == i && t[lu]->x == j)){

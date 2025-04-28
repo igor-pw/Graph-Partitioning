@@ -2,23 +2,7 @@
 #include <limits.h>
 
 
-int dfs(node_t *t, int node, int gr, int *hbs){
-	int count = 1;
-	hbs[node]=1;
-	//przechodzimy po wszystkich sasiadach badanego wieszcholka
-	for(int i =0; i <t[node]->con_count ; i++){
-		int nb = t[node]->connected[i];
-		//sprawdzamy czy sasiad nalezey do tej samej grupy
-		if(t[nb]->group == gr && hbs[nb] == 0){
-			//przechodzimy do sasiada z tej samej grupy
-			count += dfs(t,nb,gr,hbs);
-		}
-	}
-	//zwracamy ilosc wieszcholkow do ilu przeszlismy o tej samej grupie
-	return count;
-}
-
-//zliczanie ilosci wieszcholkow za pomoca dfs-a
+//zliczanie ilosci wierzcholkow za pomoca dfs-a
 int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes){
 	int *hbs = malloc(nodes*sizeof(int));
 	int *res = malloc(ngroups*sizeof(int));
@@ -28,29 +12,31 @@ int *check_gr_con(node_t *t, grupa_g g, int ngroups, int nodes){
 			hbs[j] = 0;
 		}
 		int node = -1;
-		//szukamy wieszcholka nalezacego do gruppy
+		//szukamy wierzcholka nalezacego do grupy
 		for(int j=0; j < g[i].gr_size && node == -1; j++){
 			if(t[g[i].gr_nodes[j]]->group == i){
 				node = g[i].gr_nodes[j];
 			}
 		}
-		if(node == -1)
-			printf("gr blad!!!!\n");
-		//liczymy ilosc wieszcholkow do ktorych mozemy przejsc z wybranego wieszcholka
-		res[i]=dfs(t,node,i,hbs);
+		
+		//liczymy ilosc wierzcholkow do ktorych mozemy przejsc z wybranego wierzcholka
+		if(node != -1)	
+			res[i]=dfs(t,node,i,hbs);
 	}
+	//zwalniamy pamiec tablicy odwiedzonych wierzcholkow
 	free(hbs);
 	return res;
 }
-//dodanie sasiadujacych wieszcholkow 
+
+//dodanie sasiadujacych wierzcholkow 
 void ad_nb_nodes(node_t *t, double **L_matrix, int nodes){
-	//przechodzmiy po wszystkich wieszcholkoach
+	//przechodzmiy po wszystkich wierzcholkoach
 	for(int i = 0; i< nodes; i++){
 		//zajmujemy pamiec dla ilosci sasiadow i zapisujemy ich ilosc
 		t[i]->connected = malloc(L_matrix[i][i] * sizeof(int));
 		t[i]->con_count = L_matrix[i][i];
 		int tmp = 0;
-		//przechodzmi po macierzy i sprawdzamy gdzie wieszcholek ma polonczenie
+		//przechodzmi po macierzy i sprawdzamy gdzie wierzcholek ma polaczenie
 		for(int j =0; j< nodes; j++){
 			if(L_matrix[i][j] == -1){
 				t[i]->connected[tmp] = j;
@@ -61,16 +47,16 @@ void ad_nb_nodes(node_t *t, double **L_matrix, int nodes){
 	}
 }
 
-//dodanie wieszchollka do konca kolejki
+//dodanie wierzchollka do konca kolejki
 void add_to_end(que_list **head, int con){
 	//alokujemy pamiec na nowy elemnt kolejki
 	que_list *new_node = malloc(sizeof(que_list));
 
-	//doodajemy wieszcholek i ustawiamy wskaznik na NULL dla nastepnego elemntu
+	//doodajemy wierzcholek i ustawiamy wskaznik na NULL dla nastepnego elemntu
 	new_node->que = con;
 	new_node->next = NULL;
 	
-	//jezeli kolejka byla pusta to ustawiamy pierwszy elemnt jako ostatni wskazuje na samego siebie
+	//jezeli kolejka byla pusta to ustawiamy pierwszy elemnt jako ostatni i wskazuje na samego siebie
 	if(*head == NULL){
 		new_node->last = new_node;
 		*head = new_node;
@@ -86,13 +72,13 @@ void add_to_end(que_list **head, int con){
 
 }
 
-//dodanie sasiadow wieszcholka do kolejki 
+//dodanie sasiadow wierzcholka do kolejki 
 void add_to_que(que_list **l_gr, node_t *t, int node, int *D_vector){
-	//przechodzimy po wszystkich sasiadach wieszcholka 
+	//przechodzimy po wszystkich sasiadach wierzcholka 
 	for(int i = 0; i <t[node]->con_count; i++){
 		int ing = t[node]->connected[i];
 		int tmp = D_vector[ing];
-		//dodajmy na odpowiedni koniec kolejki wieszcholek
+		//dodajmy na odpowiedni koniec kolejki wierzcholek
 		add_to_end(&l_gr[tmp],ing);
 	}
 
@@ -123,36 +109,36 @@ void rm_first(que_list **head){
 	free(first_node);
 }
 
-//sprawdzamy czy wieszcholek nadaje sie do dodania do grupy
+//sprawdzamy czy wierzcholek nadaje sie do dodania do grupy
 int is_valid(que_list **head, node_t *t){
 	//przechodzimy po kolejce dopuki nie jest pusta
 	while(*head != NULL){
 		int tmp = (*head)->que;
-		//sprawdzamy czy wieszcholek nie zostal przydzielony doo zadnej grupy
+		//sprawdzamy czy wierzcholek nie zostal przydzielony doo zadnej grupy
 		if(t[tmp]->group ==-1){
 			//jezeli mozna go przydzielic to usuwamy go z kolejki i zwracmy go
 			rm_first(head);
 			return tmp;
 		}
-		//jezeli wieszcholek juz ma jakas grupe to usuwamy go z kolejki
+		//jezeli wierzcholek juz ma jakas grupe to usuwamy go z kolejki
 		rm_first(head);
 	}
-	//jezeli kolejka byla pusta badz nie mozna rzydzielic wieszcholka to zwracamy -1
+	//jezeli kolejka byla pusta badz nie mozna rzydzielic wierzcholka to zwracamy -1
 	return -1;
 	
 }
 
 void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector){
 	int succes = 0;
-	//przechodzimy po kolejce tyle razy ile moze byc maksymalnych polonczen
+	//przechodzimy po kolejce tyle razy ile moze byc maksymalnych polanczen
 	for(int i = 0; i < g[gr].max_con && succes != 1; i++){
 		if(l_gr[i] != NULL){
 			int node = is_valid(&l_gr[i],t);
-			//jezeli kolejka nie jest pusta to staramy sie dodac wieszcholek do grupy i sprawdzamy czy juz wczesniej nie zostal przydzielony
+			//jezeli kolejka nie jest pusta to staramy sie dodac wierzcholek do grupy i sprawdzamy czy juz wczesniej nie zostal przydzielony
 			if(node != -1){
-			//dodajemy wszystkie wieszcholki sasiadow do kolejki
+			//dodajemy wszystkie wierzcholki sasiadow do kolejki
 			add_to_que(l_gr,t,node,D_vector);
-			//przydzielamy badany wieszcholek do grupy
+			//przydzielamy badany wierzcholek do grupy
 			t[node]->group = gr;
 			g[gr].gr_nodes[g[gr].gr_size] = node;
 			g[gr].gr_size++;
@@ -163,16 +149,16 @@ void add_from_que(que_list **l_gr, node_t *t,grupa_g g, int gr, int *D_vector){
 	}
 }
 
-//dodanie wolnych wieszcholkow
+//dodanie wolnych wierzcholkow
 void con_free_nodes(node_t *t, grupa_g g ,int nodes){
 	int fixed =0;
-	//dokonujemy zmiany dopuki sa jakies wieszcholki bez grupy
+	//dokonujemy zmiany dopuki sa jakies wierzcholki bez grupy
 	while(fixed != 1){
 		fixed = 1;
-		//przechodzimy po wszzystkich wieszcholkach i sprawdzmy czy sa jakies bez grupy
+		//przechodzimy po wszzystkich wierzcholkach i sprawdzmy czy sa jakies bez grupy
 		for(int i =0; i <nodes; i++){
 			if(t[i]->group ==-1){
-				//jezeli natrafilismy na jakis bez grupy szukamy z jakimi innymi wieszcholkami ma polonczenie i wyberamy ta grupe ktora jest najmniejsza
+				//jezeli natrafilismy na jakis bez grupy szukamy z jakimi innymi wierzcholkami ma polanczenie i wyberamy ta grupe ktora jest najmniejsza
 				int smallest_gr = INT_MAX;
 				int gr_to = -1;
 				for(int j =0; j< t[i]->con_count; j++){
@@ -183,7 +169,7 @@ void con_free_nodes(node_t *t, grupa_g g ,int nodes){
 					gr_to = gr;
 					}
 				}
-				//jezeli znalezlismy to dodajemy wieszcholek do tej grupy
+				//jezeli znalezlismy to dodajemy wierzcholek do tej grupy
 				if(gr_to !=-1){
 				t[i]->group = gr_to;
 				fixed = 0;
@@ -200,12 +186,12 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 	eigen_quantile(eigenvector, ngroups, nodes, t, g, L_matrix);
 	que_list ***l = malloc(ngroups * sizeof(que_list**));
 	int tmp = -1;
-	//szukamy najwiekszej liczby polonczen z wieszcholka w calym grafie
+	//szukamy najwiekszej liczby polanczen z wierzcholka w calym grafie
 	for(int i =0; i < nodes; i++){
 		if(D_vector[i] > tmp)
 			tmp=D_vector[i];
 	}	
-	tmp++; // bo nie ma 0 polonczen wiec zaczynamy od 1 
+	tmp++; // bo nie ma 0 polanczen wiec zaczynamy od 1 
 	
 	//inicjalizujemy dwu wymiarowa tablice na wskazniki do paczatku listy liniowej
 	for(int i = 0; i <ngroups; i++){
@@ -216,13 +202,13 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 		}
 	}
 	
-	//przechodzimy od korzenia w kazdej grupie i przydzielamy mu nowy wieszcholek
+	//przechodzimy od korzenia w kazdej grupie i przydzielamy mu nowy wierzcholek
 	for(int i =0; i <ngroups; i++){
 		
 		add_to_que(l[i],t,g[i].gr_nodes[0],D_vector);
 	}
 	
-	//dodajemy wieszcholki do grupy az do momentu osiagniecia najwiekszego marginesu przez grupe
+	//dodajemy wierzcholki do grupy az do momentu osiagniecia najwiekszego marginesu przez grupe
 	for(int i =0; i < max_gr_size; i++){
 		//rownomiernie rozrastamy kazda grupe
 		for(int j = 0; j <ngroups; j++){
@@ -230,21 +216,23 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 		}
 	}
 
-	//dodajemy do grup wieszcholki kture nie zostaly jeszcze przydzielone
+	//dodajemy do grup wierzcholki ktore nie zostaly jeszcze przydzielone
 	con_free_nodes(t,g,nodes);
 
 	//przechodzimy po kazdym elemencie tablicy i zwalniamy pamiec
 	for(int i = 0; i < ngroups; i++){
 		for(int j=0; j< tmp; j++){
 			while(l[i][j] != NULL){
+				//zwalniamy pozostale elemnty w kolejce
 				rm_first(&l[i][j]);
 			}
+			//zwalniamy kolejne elemnty wiersza
 			free(l[i][j]);
 		}
-
+		//zwalniamy kolejne elemnty kolumny
 		free(l[i]);
 	}
-
+	//zwalniamy tablice struktury
 	free(l);
 
 }

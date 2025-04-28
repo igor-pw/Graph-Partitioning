@@ -403,11 +403,11 @@ void gain_calculate(node_t *t, int ngroups, int nodes)
 	
 	for(int i = 0; i < nodes; i++)
 	{
-		//zerujemy tablice z ilosca polonczen
+		//zerujemy tablice z ilosca polanczen
 		int cur_node_gr = t[i]->group;
 		for(int j = 0; j < ngroups; j++)
 			dif[j] = 0;
-		//przechodzimy po sasiadujacych wieszcholkach i dodajemy ilosc wieszcholkow do grup
+		//przechodzimy po sasiadujacych wierzcholkach i dodajemy ilosc wierzcholkow do grup
 		for(int j =0; j <t[i]->con_count; j++)
 			dif[t[t[i]->connected[j]]->group]++;
 		
@@ -428,7 +428,7 @@ void gain_calculate(node_t *t, int ngroups, int nodes)
 			}
 		}
 		
-		if(gr == cur_node_gr){ // jesli mamy polonczenie tylko z gupa do ktorej nalezymy to gain = ilosci przejsc do tej grupy 
+		if(gr == cur_node_gr){ // jesli mamy polanczenie tylko z gupa do ktorej nalezymy to gain = ilosci przejsc do tej grupy 
 			t[i]->gr_gain = gr;
 			t[i]->gain = dif[gr];
 		}
@@ -454,7 +454,7 @@ void print_gain(node_t *t, int nodes)
 
 		if(t[i]->gain < 0 && x <= 1)
 		{
-			printf("wieszcholek %d z grupy %d krawedzi %d -> gain group %d gain %d\n",i,t[i]->group,x,t[i]->gr_gain,t[i]->gain);
+			printf("wierzcholek %d z grupy %d krawedzi %d -> gain group %d gain %d\n",i,t[i]->group,x,t[i]->gr_gain,t[i]->gain);
 			counter++;
 		}
 	}

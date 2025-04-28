@@ -233,7 +233,7 @@ void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, dou
 		int node = -1;
 		
 		int *node_gr = malloc(size * sizeof(int));
-		//szukamy wieszcholkow ktore maja dana wartosc wlasna
+		//szukamy wierzcholkow ktore maja dana wartosc wlasna
 		for(int j = 0; j < size; j++){
 			for(int l =0; l < k; l++){
 				if(eigen_tmp[j] == t[l]->eigenvalue){
