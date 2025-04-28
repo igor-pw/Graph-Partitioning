@@ -210,7 +210,7 @@ void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, dou
 	double div = (double)k/n;
 	int tmp =0; // potrzebne do obliczenia ostatniej grupy;
 
-	//przydzielamy kazdemu wieszcholkowi gr -1 co jest rownoznaczne z tym, ze wieszcholek nie zostal przydzielony do zadnej grupy	
+	//przydzielamy kazdemu wierzcholkowi gr -1 co jest rownoznaczne z tym, ze wierzcholek nie zostal przydzielony do zadnej grupy	
 	for(int i = 0; i< k; i++)
 		t[i]->group = -1;
 	
@@ -243,7 +243,7 @@ void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, dou
 
 			}
 		}
-		//szukamy wieszcholka z najwieksza liczba polonczen aby wybrac go jako korzen
+		//szukamy wierzcholka z najwieksza liczba polanczen aby wybrac go jako korzen
 		for(int j = 0; j< size; j++){
 			int nr = node_gr[j];
 			if(L_matrix[nr][nr] > max_len){
@@ -251,7 +251,7 @@ void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, dou
 				node = nr;
 			}
 		}
-		//przydzielamy korzeniowi grupe i wpisujemy go tablicy z wieszcholkami grupy
+		//przydzielamy korzeniowi grupe i wpisujemy go do tablicy z wierzcholkami grupy
 		g[i-1].gr_nodes[0] = node;
 		g[i-1].gr_size =1;
 		t[node]->group = i-1;
@@ -259,7 +259,7 @@ void eigen_quantile(double *eigenvector, int n, int k, node_t *t, grupa_g g, dou
 		free(eigen_tmp);
 		free(node_gr);
 		}
-	//robimy to samo tylko ze dla ostatniej grupy, uwzgledniamy tutaj niedokladnosc wynikajac z reszty przy dzieleniu na grupy 
+	//robimy to samo tylko ze dla ostatniej grupy, uwzgledniamy tutaj niedokladnosc wynikajaca z reszty przy dzieleniu na grupy 
 	int size = k - tmp;
 	double *eigen_tmp = malloc(size * sizeof(double));
 	int count = 0;
