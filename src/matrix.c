@@ -396,21 +396,24 @@ void assing_eigen(node_t *t, double *eigenvector, int n){
 			t[i]->eigenvalue=eigenvector[i];
 }
 
+//obliczanie gaina
 void gain_calculate(node_t *t, int ngroups, int nodes)
 {
 	int dif[ngroups];
 	
 	for(int i = 0; i < nodes; i++)
 	{
+		//zerujemy tablice z ilosca polonczen
 		int cur_node_gr = t[i]->group;
 		for(int j = 0; j < ngroups; j++)
 			dif[j] = 0;
-		
+		//przechodzimy po sasiadujacych wieszcholkach i dodajemy ilosc wieszcholkow do grup
 		for(int j =0; j <t[i]->con_count; j++)
 			dif[t[t[i]->connected[j]]->group]++;
-
+		
 		int min = INT_MAX;
 		int gr = -1;
+		//przechodzimy po ilosciach polaczen do innych grup i szukamy najmniejszej roznicy
 		for(int j = 0; j < ngroups; j++)
 		{
 			if( dif[j] != 0 )
