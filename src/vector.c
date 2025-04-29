@@ -5,7 +5,7 @@ static int depth = 0;
 
 int *create_D_vector(int **matrix, int n, double *D_norm)
 {	
-	//alokujemy pamiec na n wskaznikow do tablic
+	//alokujemy pamiec dla n elementow tablic
         int *D_vector = malloc(sizeof(int) * n);	
 
 	int sum = 0;
