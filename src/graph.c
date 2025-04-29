@@ -52,12 +52,6 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int n, int
 	if(group_margin > 0 && !strict)
 		printf("ilosc grup niezgodnych z marginesem: %d\n", group_margin);
 
-	int wolne_wieszcholki = 0;
-	for(int i =0; i< nodes; i++){
-		if(t[i]->group == -1)
-			wolne_wieszcholki++;
-	}
-
 	printf("poczatkowa ilosc krawedzi: %d\n", all_edges);
 	printf("usuniete krawedzie: %d\n", all_edges-edges);
 	printf("procent usunietych krawedzi: %g\n", (double)(all_edges-edges)/(double)(all_edges));

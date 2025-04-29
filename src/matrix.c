@@ -2,7 +2,7 @@
 #include "headers/vector.h"
 #include "headers/graph.h"
 #include <ctype.h>
-#define am 153600
+#define am 512000
 
 int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 {
@@ -129,19 +129,24 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 
 double **create_L_matrix(int **A_matrix, int *D_vector, int n)
 {
+	//alokacja pamieci na wskazniki do wierszy
 	double **L_matrix = malloc(sizeof(double*) * n);
 
+	//wyzerowanie wszystkich elementow wierszy
 	for(int i = 0; i < n; i++)
 		L_matrix[i] = calloc(n, sizeof(double));
+
 
 	for(int i = 0; i < n; i++)
 	{
 		for(int j = 0; j < n; j++)
-		{		
+		{	
+			//w miejsce 1 w macierzy sasiedztwa wstawiamy do macierzy Laplace'a -1	
 			if(A_matrix[i][j] == 1)
 				L_matrix[i][j] = -1;
 		}
-
+		
+		//wstawiamy na diagonale wartosci z wektora stopni
 		L_matrix[i][i] = D_vector[i];
 	}
 

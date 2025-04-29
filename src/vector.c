@@ -149,18 +149,22 @@ double find_smallest_eigenvalue(double *vec, int n)
 	return eigenvalue;
 }
 
-double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
+double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matrix, int n, double learning_rate, 
+		double momentum, double *velocity, double *epsilon_margin, double *epsilon, double *prev_epsilon)
 {
-	//
+	//wyznaczenie przybliżenia
 	double *r_vec = multiply_compressed_mtx_by_vec(matrix, vec, n);
+
+	//wyznaczenie gradientu
 	double *gradient = multiply_compressed_mtx_by_vec(matrix, r_vec, n);
 
 	for(int i = 0; i < n; i++)
 		gradient[i] *= 2;
 
 	copy_vec(vec, r_vec, n);
-
 	double vec_norm = 0;
+
+	//obliczenie momentum i wyznaczenie dlugosci wektora wlasnego
 	for(int i = 0; i < n; i++)
 	{
 		velocity[i] = momentum*velocity[i] + (1 - momentum)*gradient[i];
@@ -168,40 +172,46 @@ double *calculate_eigenvector(double *vec, double **gradient_matrix, csr_t matri
 		vec_norm += vec[i]*vec[i];
 	}
 
+	//normalizacja wektora wlasnego
 	vec_norm = sqrt(vec_norm);
 	divide_vec(vec, vec_norm, n);
-
 	*epsilon = 0;
 
+	//obliczenie roznicy pomiedzy obecnym, a wczesniejszym wektorem wlasnym
 	for(int i = 0; i < n; i++)
 		*epsilon += (pow(vec[i]-r_vec[i], 2));
 
 	*epsilon = sqrt(*epsilon);
-	
 	free(r_vec);
 	free(gradient);
 
+	//zwiekszamy licznik zaglebienia rekurencji
 	depth++;
-	
+
+	//jezeli epsilon zacznie oddawalac sie od wyznaczenia poprawnego wektora wlasnego zwracamy aktualny wektor wlasny	
 	if(*epsilon < pow(10, -3) && *epsilon >= *prev_epsilon)
 	{
-		printf("KONIEC\n");
+		//zmniejszamy margines aby wyjscie z petli w main()
 		*epsilon_margin = pow(10, -3);
 		return vec;
 	}
 
 	*prev_epsilon = *epsilon;
 
+	//jezeli epsilon nie osiagnal zadanego marginesu wywolujemy funkcje rekurencyjnie
 	if(*epsilon > *epsilon_margin && depth < 10000)
 	{	
 		vec = calculate_eigenvector(vec, gradient_matrix, matrix, n, learning_rate, momentum, velocity, epsilon_margin, epsilon, prev_epsilon);
 	}
 
+	//jezeli po 10000 iteracjach epsilon nie osiagnie zadanej wartosci zwracamy NULL
 	if(depth >= 10000)
 	{
 		depth = 0;	
 		return NULL;
 	}
+
+	//w przypadku powodzenia zwracamy wektor wlasny
 	else
 		return vec;
 }

@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -ggdb -Wall -Wextra -std=c99 -lm
 TARGET = bin/G-Cut
-TEST = --output wyjscie.txt --input data/graf1.csrrg --divide 1000 --margin 0.5 --strict 0 
+TEST = --output wyjscie.txt --input data/graf1.csrrg --divide 600 --margin 0.5 --strict 0 
 FILES = src/G-Cut.c src/matrix.c src/vector.c src/input.c src/groups.c src/graph.c
 
 compile: src/G-Cut.c src/matrix.c src/vector.c src/input.c

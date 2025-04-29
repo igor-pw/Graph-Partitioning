@@ -1,47 +1,55 @@
 #include <ctype.h>
 #include "headers/input.h"
 
-
-void check_flag(Flags *flags, const char *flag)
+Flags check_flag(const char *flag)
 {
+	//funkcja zwraca przypisana do flagi wartosc liczbowa
 	if(strcmp(flag, "--divide") == 0)
-		*flags = Divide;
+		return Divide;
 
 	else if(strcmp(flag, "--margin") == 0)
-		*flags = Margin;
+		return Margin;
 
 	else if(strcmp(flag, "--input") == 0)
-		*flags = Input_name;
+		return Input_name;
 
 	else if(strcmp(flag, "--output") == 0)
-		*flags = Output_name;
+		return Output_name;
 
 	else if(strcmp(flag, "--strict") == 0)
-		*flags = Strict;
+		return Strict;
 
+	//jezeli podana flaga nie poprawna zwracamy wartosc typu Error
 	else
-		*flags = Error;
+		return Error;
 }
 
 void *scan_flags(Flags *flags, char **argv, int flag_index)
 {
+	//przeszukuje argumenty wywolania w celu odnalezienia flag
+	
 	void *value = NULL;
 
+	//jezeli pierwsze 2 znaki napisu to '-' sprawdzamy czy flaga jest poprawna
 	if(argv[flag_index][0] == '-' && argv[flag_index][1] == '-')
-		check_flag(flags, argv[flag_index]);
+		*flags = check_flag(argv[flag_index]);
 	
+	//zwracamy NULL
 	if(*flags == 0)
 		return value;
 
-	if(argv[++flag_index][0] == '-')
+	//jezeli nastepna wartosc to kolejna flaga zwracamy wartosc Error
+	if(argv[++flag_index][0] == '-' && argv[flag_index][1] == '-')
 	{
 		*flags = Error;
 		return value;
 	}
 
+	//przypisujemy wskaznik do wartosc flagi
 	else
 		value = argv[flag_index];
 
+	//zwracamy wskanik
 	return value;
 }
 

@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	//odczytanie flag i ich wartosci
 	while(argv_index < argc-1)
 	{
-		//odczytanie wskaznika typu void
+		//szukanie flag oraz odczytanie wskaznika typu void do wartosci flagi
 		void *ptr_flag_value = scan_flags(&flags, argv, argv_index);
 
 		if(ptr_flag_value != NULL)
@@ -59,6 +59,7 @@ int main(int argc, char **argv)
 				++argv_index;
 	}
 
+	//sprawdzenie poprawnosci divide oraz margin
 	if(divide < 2)
 	{
 		printf("Nieprawidlowa wartosc flagi divide\n");
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
 	if(input_name == NULL)
 		return 3;
 		
-	//otwieramy plik z grafem
+	//otwarcie plik z grafem
 	FILE *in = fopen(input_name, "r");
 
 	if(in == NULL)
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
 	double D_norm = 0;
 	int connections1 =0;
 
-	//odczytujemy maksymalna ilosc wierzcholkow w jednym wierszu
+	//odczytanie maksymalnej ilosc wierzcholkow w jednym wierszu
 	fscanf(in, "%d\n", &n);
 	
 	if(n == 0)
@@ -119,8 +120,8 @@ int main(int argc, char **argv)
 
 	if(max_nodes*divide < nodes)
 	{		
-		printf("podzial na %d czensci przy marginesie %lf nie jest mozliwy\n",divide,margin);
-		printf("prosze zmienic ilosc grup na jaka chcemy podzielic graf, badz zwiekszyc margines!\n");
+		printf("podzial na %d czesci przy marginesie %lf nie jest mozliwy\n",divide,margin);
+		printf("prosze zmienic ilosc grup na jakie program ma podzielic graf, badz zwiekszyc margines!\n");
 		return 1;
 	}
 
@@ -236,7 +237,8 @@ int main(int argc, char **argv)
 	do
 	{
 		eigenvector = calculate_eigenvector(initial_vec, L_matrix, compressed_L_matrix, nodes, learning_rate, momentum, velocity, &epsilon_margin, &epsilon, &prev_epsilon);
-	
+
+	//funkcja wykonuje sie do momentu osiagniecia zadanego marginsesu	
 	} while(epsilon > epsilon_margin);
 
 	printf("Wektor wlasny\n");
@@ -294,6 +296,15 @@ int main(int argc, char **argv)
 		}
 	}
 
+	for(int i = 0; i < nodes; i++)
+	{
+		if(t[i]->group == -1)
+		{
+			is_consistent = false;
+			break;
+		}
+	}
+
 	//flaga okreslajaca czy wszystkie grupy maja wiecej niz 1 wierzcholek
 	bool is_graph = true;
 
@@ -307,8 +318,8 @@ int main(int argc, char **argv)
 		}
 	}	
 
+	free(dfs_check);
 	free(gr_nodes);
-
 
 	//przy spelnieniu wszystkich wymagow nastepuje zapisanie podzialu do pliku oraz wypisanie rezultatow podzialu
 	if(((in_margin || !strict)) && is_consistent && is_graph)
@@ -328,7 +339,7 @@ int main(int argc, char **argv)
 
 	//zwracamy kod niepowodzenia podzialu grafu
 	if((!in_margin && strict) || !is_graph || !is_consistent)
-		return 5;
+		return 6;
 	
 	//zwracamy kod powodzenia podzialu grafu
 	return 0;

@@ -240,14 +240,19 @@ void list_gr_con(node_t *t, grupa_g g, int nodes, int ngroups, int max_gr_size, 
 
 void refine_groups(node_t *node, int n, grupa_g group, int max, int min)
 {
+	//rafinacja grup
+
 	for(int i = 0; i < n; i++)
 	{
+		//dla kazdego wierzcholka sprawdzamy kandydata do przeniesenia do innej grupy
 		if(node[i]->is_leaf && node[i]->gain < 0 && group[node[i]->group].gr_size > min)
 		{
 			int group_gain = node[i]->gr_gain;
 
+			//jezeli grupa nie osiagnela maksymalnego rozmiaru przerzucamy do niej wierzcholek
 			if(group[group_gain].gr_size < max && group_gain >= 0) 
 			{
+				//aktualizujemy grupe o nowy wierzcholek
 				group[node[i]->group].gr_size--;
 				node[i]->group = node[i]->gr_gain;
 				node[i]->gr_gain = -1;
