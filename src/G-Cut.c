@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 		L_matrix[i][i] += eigenvalue;	
 
 	//przypisanie wartosci wektora wlasnego
-	assing_eigen(t, eigenvector, nodes);
+	assign_eigen(t, eigenvector, nodes);
 	printf("Przydzielenie wartosci wektora wlasnego\n");
 
 	//sortujemy wektor wlasny

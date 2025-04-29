@@ -72,14 +72,14 @@ double *multiply_mtx_by_vec(double **matrix, double *vec, int n)
 
 double *multiply_compressed_mtx_by_vec(csr_t csr, double *vec, int n)
 {
+	//wypelnienie wektora zerami
 	double *result_vec = calloc(n, sizeof(double));
 		
 	for(int i = 0; i < n; i++)
 	{
 		for(int j = csr->row_ptr[i]; j < csr->row_ptr[i+1]; j++)
-		{
+			//sumowanie wynikow mnozenia niezerowych elementow macierzy z wektorem
 			result_vec[i] += csr->values[j]*vec[csr->col_index[j]]; 	
-		}
 	}
 
 	return result_vec;

@@ -22,7 +22,7 @@ void transpose_matrix(double **matrix, int n);
 void copy_matrix(double **src_matrix, double **dest_matrix, int n);
 double **multiply_mtx_by_mtx(double **left_matrix, double **right_matrix, int n);
 void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i);
-void assing_eigen(node_t *t, double *eigenvector, int n);
+void assign_eigen(node_t *t, double *eigenvector, int n);
 void gain_calculate(node_t *t, int ngroups, int nodes);
 void print_gain(node_t *t, int nodes);
 void free_matrix(double **matrix, int n);

@@ -396,7 +396,7 @@ void calculate_eigenvalue(double **T_matrix, double **Q_matrix, int n, int i)
 	}	
 }
 
-void assing_eigen(node_t *t, double *eigenvector, int n){
+void assign_eigen(node_t *t, double *eigenvector, int n){
 	for(int i =0; i <n; i++)
 			t[i]->eigenvalue=eigenvector[i];
 }
