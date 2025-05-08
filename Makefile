@@ -1,14 +1,14 @@
 CC = cc
 CFLAGS = -ggdb -Wall -Wextra -std=c99 -lm
 TARGET = bin/G-Cut
-TEST = --output wyjscie.txt --input data/graf1.csrrg --divide 100 --margin 0.1 --strict 1 
+TEST = --output wyjscie.txt --input data/graf1.csrrg --margin 0.1 --divide 500 --strict 1 
 FILES = src/G-Cut.c src/matrix.c src/vector.c src/input.c src/groups.c src/graph.c
 
 compile: src/G-Cut.c src/matrix.c src/vector.c src/input.c
 	$(CC) $(FILES) -o $(TARGET) $(CFLAGS)
 
 valgrind:
-	valgrind --track-origins=yes --show-leak-kinds=all --leak-check=full -s ./$(TARGET) $(TEST)
+	valgrind --track-origins=yes --leak-check=full -s ./$(TARGET) $(TEST)
 
 execute: 
 	./$(TARGET) $(TEST)

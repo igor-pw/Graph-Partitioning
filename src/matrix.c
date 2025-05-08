@@ -69,11 +69,14 @@ int **create_A_matrix(FILE *in, int *nodes, node_t **t, int *connections1)
 
 	int counter = 0;	
 	//odczytanie 4 linii pliku i zapisanie do bufora
-	do
+	
+	c = ';';
+	
+	while(!isspace(c))
 	{
 		if(fscanf(in, "%d%c", &index[counter], &c) == 2)
 			counter++;
-	} while(!isspace(c));
+	} 
 
 	//alokujemy pamiec na size wskaznikow do tablic
         int **matrix = malloc(sizeof(int*) * size);

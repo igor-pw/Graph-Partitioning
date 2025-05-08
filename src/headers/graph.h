@@ -1,5 +1,6 @@
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
+#include <stdio.h>
 #include <stdbool.h>
 #include "matrix.h"
 #include "structs.h"

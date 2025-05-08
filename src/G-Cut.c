@@ -73,8 +73,10 @@ int main(int argc, char **argv)
 	}
 
 	if(input_name == NULL)
+	{
+		printf("Niepodano pliku wejsciowego\n");
 		return 3;
-		
+	}	
 	//otwarcie plik z grafem
 	FILE *in = fopen(input_name, "r");
 

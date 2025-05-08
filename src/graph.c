@@ -4,21 +4,34 @@
 void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int n, int all_edges, char *file_name, int group_margin, bool strict)
 {	
 	FILE *out = fopen(file_name, "w");
+	char* bin_out = "output.bin";
+	FILE *bin = fopen(bin_out, "wb");
 
 	int lu = 0;
+	char white_space = ' ';
+	int one = 1;
+	int zero = 0;
+	char nl = '\n';
 	//wypisujemy polozenie wieszcholkow
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
 			if(lu < nodes && (t[lu]->y == i && t[lu]->x == j)){
 				fprintf(out, "1 ");
+				fwrite(&one,sizeof(int),1,bin);
+				fwrite(&white_space,sizeof(char),1,bin);
 				lu++;
 			}
-			else
+			else{
 				fprintf(out, "0 ");
+				fwrite(&zero,sizeof(int),1,bin);
+				fwrite(&white_space,sizeof(char),1,bin);
+			}
 		}
 		fprintf(out, "\n");
+		fwrite(&nl,sizeof(char),1,bin);
 	}
 	fprintf(out, "\n");
+	fwrite(&nl,sizeof(char),1,bin);
 	
 
 	printf("Zapisanie podzielonego grafu do pliku\n");
@@ -26,10 +39,16 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int n, int
 	int edges = 0;
 
 	printf("\n");
+
+	char* grupa = "grupa ";
+	char mi = '-';
 	
 	//wypisanie polanczen wieszcholkow w grupach
 	for(int k = 0; k <ngroups; k++){
 		fprintf(out, "grupa %d\n", k);
+		fwrite(&grupa, sizeof(char),6,bin);
+		fwrite(&nl,sizeof(char),1,bin);
+
 		for(int i =0; i<nodes; i++){
 			if( t[i]->group == k){
 					for(int j = i; j < nodes; j++){
@@ -37,15 +56,21 @@ void print_results(node_t *t, int nodes, int ngroups, int **A_matrix, int n, int
 						{
 							edges++;
 							fprintf(out, "%d-%d\n",i,j);
+							fwrite(&i,sizeof(int),1,bin);
+							fwrite(&mi,sizeof(char),1,bin);
+							fwrite(&j,sizeof(int),1,bin);
+							fwrite(&nl,sizeof(char),1,bin);
 						}
 					}
 			}
 		}
 		fprintf(out, "\n");
+		fwrite(&nl,sizeof(char),1,bin);
 
 	}
 
 	fclose(out);
+	fclose(bin);
 
 	printf("Rezultaty:\n");
 
